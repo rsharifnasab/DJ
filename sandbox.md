@@ -70,7 +70,9 @@ roozbeh:1000000:65536
 root:1000000:65536
 roozbeh:1000000:65536
 ```
++ storage pool is here `/var/lib/lxd/storage-pools`
 
 ## cheetsheat
 + [github gist](https://gist.github.com/berndbausch/a6835150c7a26c88048763c0bd739be6) 
+
 
