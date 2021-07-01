@@ -18,16 +18,17 @@ func Run() {
 
 	const timeout = 2 * time.Second
 
-	for i := 1; i <= 5; i++ {
+	const testsCount = 6
+	for i := 1; i <= testsCount; i++ {
 		testInpAddr := fmt.Sprintf("./examples/tests/in/input%d.txt", i)
 		testInpData, err := ioutil.ReadFile(testInpAddr)
 		if err != nil {
 			panic(err)
 		}
-		println("test input : [", strings.TrimSpace(string(testInpData)), "]")
+		fmt.Printf("test input : [%v]\n", strings.TrimSpace(string(testInpData)))
 
-		ctx, closeContext := context.WithTimeout(context.Background(), timeout)
-		defer closeContext() // cleanup resources
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel() // cleanup resources
 
 		// Create the command with our context
 		cmd := exec.CommandContext(ctx, compiledFile)
@@ -39,10 +40,16 @@ func Run() {
 		}
 
 		out, err := cmd.Output()
+
+		//cancel()
+		//time.Sleep(3 * time.Second)
+		// here should not have performace critical code
+
 		//err = cmd.Run()
-		if ctx.Err() != nil {
-			println(ctx.Err().Error())
-		}
+		//if ctx.Err() != nil {
+		//	print(".")
+		//	println(ctx.Err().Error()) // it says context cancelled
+		//}
 		//cmd.Wait()
 
 		if ctx.Err() == context.DeadlineExceeded {
