@@ -1,4 +1,27 @@
-./student
-./ta
-a.out
+/student
+/ta
+*.out
 *.class
+
+# Created by https://www.gitignore.io/api/go
+# Edit at https://www.gitignore.io/?templates=go
+
+### Go ###
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+### Go Patch ###
+/vendor/
+/Godeps/
+
+# End of https://www.gitignore.io/api/go
