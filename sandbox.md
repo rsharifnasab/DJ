@@ -75,4 +75,5 @@ roozbeh:1000000:65536
 ## cheetsheat
 + [github gist](https://gist.github.com/berndbausch/a6835150c7a26c88048763c0bd739be6) 
 
++ [publish image](https://ubuntu.com/blog/publishing-lxd-images)
 
