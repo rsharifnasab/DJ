@@ -41,6 +41,15 @@ func Run() {
 
 		out, err := cmd.Output()
 
+		/*
+		   limitedReader := &io.LimitedReader{R: response.Body, N: limit}
+		   body, err := ioutil.ReadAll(limitedReader)
+
+		   or
+
+		   body, err := ioutil.ReadAll(io.LimitReader(response.Body, limit))
+		*/
+
 		//cancel()
 		//time.Sleep(3 * time.Second)
 		// here should not have performace critical code
