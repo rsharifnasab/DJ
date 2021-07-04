@@ -3,6 +3,13 @@ void f()
 {
     f();
 }
+
+void printMuch(void){
+    long t = 900L;
+    while(t--){
+        printf("1\n");
+    }
+}
 int main()
 {
     int i;
@@ -19,8 +26,11 @@ int main()
         return 1 / 0;
     case 4: // runtime error again
         return *(p);
-    case 5:
+    case 5: // stackoverflow
         f();
+    case 6: // print much
+        printMuch();
+        break;
     default: // ok
         std::cout << "input : " << i << std::endl;
     }

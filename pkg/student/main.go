@@ -3,6 +3,7 @@ package student
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os/exec"
 	"strings"
@@ -18,7 +19,10 @@ func Run() {
 
 	const timeout = 2 * time.Second
 
-	const testsCount = 6
+	const testsCount = 7
+
+	const outLimit int64 = /* 1024 * 1024 * */ 10
+
 	for i := 1; i <= testsCount; i++ {
 		testInpAddr := fmt.Sprintf("./examples/tests/in/input%d.txt", i)
 		testInpData, err := ioutil.ReadFile(testInpAddr)
@@ -39,15 +43,37 @@ func Run() {
 			panic(err)
 		}
 
-		out, err := cmd.Output()
+		stdoutPipe, err := cmd.StdoutPipe()
+		if err != nil {
+			panic(err)
+		}
 
+		err = cmd.Start()
+		if err != nil {
+			panic(err)
+		}
+
+		//if err != nil {
+		//	panic(err)
+		//}
+
+		//println("stdout pipe created")
+		limitedReader := &io.LimitedReader{R: stdoutPipe, N: outLimit}
+		//println("limited reader created")
+		out, err := ioutil.ReadAll(limitedReader)
+		//println("after read all")
+
+		err = cmd.Wait()
+		//println("wait complete")
 		/*
-		   limitedReader := &io.LimitedReader{R: response.Body, N: limit}
-		   body, err := ioutil.ReadAll(limitedReader)
+			 //out, err := cmd.Output()
+			OR
+			   limitedReader := &io.LimitedReader{R: response.Body, N: limit}
+			   body, err := ioutil.ReadAll(limitedReader)
 
-		   or
+			   or
 
-		   body, err := ioutil.ReadAll(io.LimitReader(response.Body, limit))
+			   body, err := ioutil.ReadAll(io.LimitReader(response.Body, limit))
 		*/
 
 		//cancel()
