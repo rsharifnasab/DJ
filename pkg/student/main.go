@@ -55,31 +55,70 @@ func GetDefaultQuestion(questionPath string) *Question {
 	}
 }
 
+func (question *Question) ruleNameToRule(rules *Rules) error {
+	for _, lang := range question.AvailableLangs {
+		lang.Rules = make(map[string]*Rule, 0)
+		for _, ruleName := range lang.RuleNames {
+			ruleObj, foundRule := rules.Map[ruleName]
+			if !foundRule {
+				return fmt.Errorf("rulename [%v] doesn't exist", ruleName)
+			}
+			lang.Rules[ruleName] = &ruleObj
+		}
+	}
+	return nil
+}
+
+func (question *Question) loadTestCases() error {
+	testsPath := question.Path + "/tests/"
+	inputFiles, readDirErr := ioutil.ReadDir(testsPath + "/in")
+	if readDirErr != nil {
+		return readDirErr
+	}
+
+	for k, v := range inputFiles {
+		inpName := v.Name()
+
+		var num int
+		n, scanfErr := fmt.Sscanf(inpName, "input%d.txt", &num)
+		if n != 1 || scanfErr != nil {
+			return fmt.Errorf("input malformed")
+		}
+
+		// check isDir
+		// add to a slice
+
+		fmt.Printf("%v : %v\n", k, num)
+	}
+	// sort slice
+	// check min(slice)==1 and max(slice) == len(slice)
+	// each one = before+1
+
+	return nil
+}
+
 func NewQuestion(questionPath string, rules *Rules) (*Question, error) {
+	question := GetDefaultQuestion(questionPath)
+
 	yamlData, loadErr := ioutil.ReadFile(questionPath + "/config.yml")
 	if loadErr != nil {
 		return nil, fmt.Errorf("cannot load config.yml in %v because:\n\t %v",
 			questionPath, loadErr)
 	}
-	question := GetDefaultQuestion(questionPath)
-
 	unmarshalErr := yaml.UnmarshalStrict(yamlData, &question)
 	if unmarshalErr != nil {
 		return nil, fmt.Errorf("cannot unmarshal config.yml file because:\n\t %v",
 			unmarshalErr)
 	}
 
-	//util.PrintStruct(question.AvailableLangs)
-	for _, lang := range question.AvailableLangs {
-		lang.Rules = make(map[string]*Rule, 0)
-		for _, ruleName := range lang.RuleNames {
-			ruleObj, foundRule := rules.Map[ruleName]
-			if !foundRule {
-				return nil, fmt.Errorf("rulename [%v] doesn't exist", ruleName)
-			}
-			lang.Rules[ruleName] = &ruleObj
-		}
+	if convertErr := question.ruleNameToRule(rules); convertErr != nil {
+		return nil, convertErr
 	}
+
+	if testCaseErr := question.loadTestCases(); testCaseErr != nil {
+		return nil, testCaseErr
+	}
+
 	return question, nil
 }
 
@@ -90,6 +129,8 @@ type Rule struct {
 }
 
 type Rules struct {
+	// TODO: apply rules in smart way with chroma
+	// https://github.com/alecthomas/chroma#supported-languages
 	Map map[string]Rule `yaml:"rules"`
 }
 
@@ -117,7 +158,7 @@ func Run() {
 	if err != nil {
 		panic(err)
 	}
-	util.PrintStruct(rules)
+	//util.PrintStruct(rules)
 
 	question, err := NewQuestion("./examples/Q1", rules)
 	if err != nil {
