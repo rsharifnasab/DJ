@@ -3,12 +3,22 @@ package student
 import (
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os/exec"
 	"strings"
 	"time"
 )
+
+type Question struct {
+}
+
+type TestCase struct {
+	Question
+}
+
+func oneTestCase(i int) {
+
+}
 
 func Run() {
 	const submissionFile = "./examples/solution.cpp"
@@ -21,7 +31,7 @@ func Run() {
 
 	const testsCount = 7
 
-	const outLimit int64 = /* 1024 * 1024 * */ 10
+	const outLimit = /* 1024 * 1024 * */ 10
 
 	for i := 1; i <= testsCount; i++ {
 		testInpAddr := fmt.Sprintf("./examples/tests/in/input%d.txt", i)
@@ -53,39 +63,15 @@ func Run() {
 			panic(err)
 		}
 
-		//if err != nil {
-		//	panic(err)
-		//}
+		outBuf := make([]byte, outLimit+1)
+		n, err := stdoutPipe.Read(outBuf)
 
-		//println("stdout pipe created")
-		limitedReader := &io.LimitedReader{R: stdoutPipe, N: outLimit}
-		//println("limited reader created")
-		out, err := ioutil.ReadAll(limitedReader)
-		//println("after read all")
+		if n == outLimit+1 {
+			println("output limit exceed")
+		}
+		out := outBuf[:n]
 
 		err = cmd.Wait()
-		//println("wait complete")
-		/*
-			 //out, err := cmd.Output()
-			OR
-			   limitedReader := &io.LimitedReader{R: response.Body, N: limit}
-			   body, err := ioutil.ReadAll(limitedReader)
-
-			   or
-
-			   body, err := ioutil.ReadAll(io.LimitReader(response.Body, limit))
-		*/
-
-		//cancel()
-		//time.Sleep(3 * time.Second)
-		// here should not have performace critical code
-
-		//err = cmd.Run()
-		//if ctx.Err() != nil {
-		//	print(".")
-		//	println(ctx.Err().Error()) // it says context cancelled
-		//}
-		//cmd.Wait()
 
 		if ctx.Err() == context.DeadlineExceeded {
 			fmt.Println("time limit exceed")
