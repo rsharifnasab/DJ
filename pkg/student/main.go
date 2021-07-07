@@ -7,20 +7,66 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/rsharifnasab/DJ/pkg/util"
+	"gopkg.in/yaml.v2"
 )
 
-type Question struct {
-}
-
 type TestCase struct {
-	Question
+	num int
+	// TODO: weight
+
+	InputFile  string
+	OutputFile string
 }
 
-func oneTestCase(i int) {
+type Preprocess struct {
+}
 
+type LanguageConfig struct {
+	Name        string        `yaml:"lang"`
+	TimeLimit   time.Duration `yaml:"time"`
+	MemoryLimit int           `yaml:"memory"`
+	Preprocess  Preprocess
+}
+
+type Question struct {
+	Name string `yaml:"name"`
+	Path string
+
+	MaxScore int `yaml:"max_score"`
+	OutLimit int `yaml:"out_limit"`
+
+	Testcase []TestCase
+
+	AvailableLangs []LanguageConfig `yaml:"languages"`
+}
+
+func NewQuestion(questionPath string) (*Question, error) {
+	yamlData, loadErr := ioutil.ReadFile(questionPath + "/config.yml")
+	if loadErr != nil {
+		return nil, fmt.Errorf("cannot load config.yml in %v because %v",
+			questionPath, loadErr)
+	}
+	question := &Question{
+		Path: questionPath,
+	}
+	unmarshalErr := yaml.UnmarshalStrict(yamlData, &question)
+	if unmarshalErr != nil {
+		return nil, fmt.Errorf("cannot unmarshal yml file because: %v",
+			unmarshalErr)
+	}
+
+	return question, nil
 }
 
 func Run() {
+	question, err := NewQuestion("./examples/Q1")
+	if err != nil {
+		panic(err)
+	}
+	util.PrintStruct(question)
+
 	const submissionFile = "./examples/solution.cpp"
 	_ = submissionFile
 	// todo compile
@@ -71,6 +117,8 @@ func Run() {
 		}
 		out := outBuf[:n]
 
+		// finished flag become true
+		// and get probable error
 		err = cmd.Wait()
 
 		if ctx.Err() == context.DeadlineExceeded {

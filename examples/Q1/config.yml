@@ -1,0 +1,14 @@
+name: Q1
+max_score: 100
+out_limit: 1
+languages:
+  - lang: c
+    time: 1000
+    memory: 50
+  - lang: cpp
+    time: 1100
+    memory: 55
+  - lang: java
+    time: 3000
+    memory: 256
+    

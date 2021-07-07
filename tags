@@ -1,0 +1,35 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/roozbeh/proj/DJ/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	/p5.9.20210110.0/
+DJ	README.md	/^# DJ$/;"	c
+InputFile	pkg/student/main.go	/^	InputFile  string$/;"	m	struct:student.TestCase	typeref:typename:string
+NewQuestion	pkg/student/main.go	/^func NewQuestion(questionPath string) (*Question, error) {$/;"	f	package:student	typeref:typename:(*Question, error)
+OutputFile	pkg/student/main.go	/^	OutputFile string$/;"	m	struct:student.TestCase	typeref:typename:string
+Path	pkg/student/main.go	/^	Path     string$/;"	m	struct:student.Question	typeref:typename:string
+Question	pkg/student/main.go	/^type Question struct {$/;"	s	package:student
+Run	pkg/student/main.go	/^func Run() {$/;"	f	package:student
+TestCase	pkg/student/main.go	/^type TestCase struct {$/;"	s	package:student
+TimeLimit	pkg/student/main.go	/^	TimeLimit Time.$/;"	m	struct:student.Question	typeref:typename:Time. Testcase
+cheetsheat	sandbox.md	/^## cheetsheat$/;"	s	chapter:lxd
+commands	sandbox.md	/^## commands$/;"	s	chapter:lxd
+config	sandbox.md	/^## config$/;"	s	chapter:lxd
+f	examples/solution.cpp	/^void f()$/;"	f	typeref:typename:void
+install	sandbox.md	/^## install$/;"	s	chapter:lxd
+lxd	sandbox.md	/^# lxd$/;"	c
+main	cmd/student/main.go	/^func main() {$/;"	f	package:main
+main	cmd/student/main.go	/^package main$/;"	p
+main	examples/solution.cpp	/^int main()$/;"	f	typeref:typename:int
+note	sandbox.md	/^## note$/;"	s	chapter:lxd
+oneTestCase	pkg/student/main.go	/^func oneTestCase(i int) {$/;"	f	package:student
+printMuch	examples/solution.cpp	/^void printMuch(void){$/;"	f	typeref:typename:void
+sandbox options	sandbox.md	/^# sandbox options$/;"	c
+student	pkg/student/main.go	/^package student$/;"	p
+to run without sudo	sandbox.md	/^## to run without sudo$/;"	s	chapter:lxd
