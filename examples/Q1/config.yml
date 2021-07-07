@@ -1,13 +1,22 @@
 name: Q1
-max_score: 100
-out_limit: 1
+max_score: 110
+out_limit: 11
+
+all_langs: false
 languages:
   - lang: c
     time: 1000
     memory: 50
+    rules: 
+      - simple
+      - empty
+
   - lang: cpp
     time: 1100
     memory: 55
+    rules:
+      #- non-existing-rule
+
   - lang: java
     time: 3000
     memory: 256

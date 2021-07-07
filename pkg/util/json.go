@@ -11,6 +11,6 @@ func PrintStruct(structt interface{}) {
 	if jsonM, err := json.MarshalIndent(structt, " ", "\t"); err != nil {
 		panic(err)
 	} else {
-		fmt.Printf("loaded question : %+v\n", string(jsonM))
+		fmt.Println(string(jsonM))
 	}
 }

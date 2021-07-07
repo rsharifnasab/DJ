@@ -1,0 +1,12 @@
+rules:
+  simple:
+      'description': no goto
+      'no':
+        - goto
+        - math.h
+        - pow
+      'yes':
+        - stdio
+        - return
+  empty: 
+    'description': do whatever you want

@@ -20,14 +20,12 @@ type TestCase struct {
 	OutputFile string
 }
 
-type Preprocess struct {
-}
-
 type LanguageConfig struct {
-	Name        string        `yaml:"lang"`
-	TimeLimit   time.Duration `yaml:"time"`
-	MemoryLimit int           `yaml:"memory"`
-	Preprocess  Preprocess
+	Name        string           `yaml:"lang"`
+	TimeLimit   time.Duration    `yaml:"time"`
+	MemoryLimit int              `yaml:"memory"`
+	RuleNames   []string         `yaml:"rules"`
+	Rules       map[string]*Rule `yaml:"NONE"`
 }
 
 type Question struct {
@@ -37,31 +35,91 @@ type Question struct {
 	MaxScore int `yaml:"max_score"`
 	OutLimit int `yaml:"out_limit"`
 
-	Testcase []TestCase
+	Testcase []*TestCase
 
-	AvailableLangs []LanguageConfig `yaml:"languages"`
+	AllLangs       bool              `yaml:"all_langs"`
+	AvailableLangs []*LanguageConfig `yaml:"languages"`
 }
 
-func NewQuestion(questionPath string) (*Question, error) {
+func GetDefaultQuestion(questionPath string) *Question {
+	return &Question{
+		Path: questionPath,
+
+		MaxScore: 100,
+		OutLimit: 10,
+
+		AllLangs:       true,
+		AvailableLangs: make([]*LanguageConfig, 0),
+
+		Testcase: make([]*TestCase, 0),
+	}
+}
+
+func NewQuestion(questionPath string, rules *Rules) (*Question, error) {
 	yamlData, loadErr := ioutil.ReadFile(questionPath + "/config.yml")
 	if loadErr != nil {
-		return nil, fmt.Errorf("cannot load config.yml in %v because %v",
+		return nil, fmt.Errorf("cannot load config.yml in %v because:\n\t %v",
 			questionPath, loadErr)
 	}
-	question := &Question{
-		Path: questionPath,
-	}
+	question := GetDefaultQuestion(questionPath)
+
 	unmarshalErr := yaml.UnmarshalStrict(yamlData, &question)
 	if unmarshalErr != nil {
-		return nil, fmt.Errorf("cannot unmarshal yml file because: %v",
+		return nil, fmt.Errorf("cannot unmarshal config.yml file because:\n\t %v",
 			unmarshalErr)
 	}
 
+	//util.PrintStruct(question.AvailableLangs)
+	for _, lang := range question.AvailableLangs {
+		lang.Rules = make(map[string]*Rule, 0)
+		for _, ruleName := range lang.RuleNames {
+			ruleObj, foundRule := rules.Map[ruleName]
+			if !foundRule {
+				return nil, fmt.Errorf("rulename [%v] doesn't exist", ruleName)
+			}
+			lang.Rules[ruleName] = &ruleObj
+		}
+	}
 	return question, nil
 }
 
+type Rule struct {
+	Description string   `yaml:"description"`
+	Yes         []string `yaml:"yes"`
+	No          []string `yaml:"no"`
+}
+
+type Rules struct {
+	Map map[string]Rule `yaml:"rules"`
+}
+
+func LoadRules(rulesPath string) (*Rules, error) {
+	yamlData, loadErr := ioutil.ReadFile(rulesPath)
+
+	if loadErr != nil {
+		return nil, fmt.Errorf("cannot load %v because:\n\t %v",
+			rulesPath, loadErr)
+	}
+	rules := &Rules{}
+
+	unmarshalErr := yaml.UnmarshalStrict(yamlData, &rules)
+	if unmarshalErr != nil {
+		return nil, fmt.Errorf("cannot unmarshal rules yml file because:\n\t %v",
+			unmarshalErr)
+	}
+
+	return rules, nil
+}
+
 func Run() {
-	question, err := NewQuestion("./examples/Q1")
+
+	rules, err := LoadRules("./examples/rules.yml")
+	if err != nil {
+		panic(err)
+	}
+	util.PrintStruct(rules)
+
+	question, err := NewQuestion("./examples/Q1", rules)
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +138,7 @@ func Run() {
 	const outLimit = /* 1024 * 1024 * */ 10
 
 	for i := 1; i <= testsCount; i++ {
-		testInpAddr := fmt.Sprintf("./examples/tests/in/input%d.txt", i)
+		testInpAddr := fmt.Sprintf("./examples/Q1/tests/in/input%d.txt", i)
 		testInpData, err := ioutil.ReadFile(testInpAddr)
 		if err != nil {
 			panic(err)
