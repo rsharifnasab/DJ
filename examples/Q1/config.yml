@@ -3,17 +3,17 @@ max_score: 110
 out_limit: 11
 
 languages:
-  - lang: c
+  c:
     time: 1000
     memory: 50
     rules:
       - simple
-  - lang: cpp
+  cpp:
     time: 1100
     memory: 55
     #rules:
       #- non-existing-rule
-  - lang: java
+  java:
     time: 3000
     memory: 256
     rules:

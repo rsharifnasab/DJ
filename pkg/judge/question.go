@@ -15,7 +15,7 @@ type Question struct {
 
 	Testcase []*TestCase
 
-	AvailableLangs []*LanguageConfig `yaml:"languages"`
+	AvailableLangs map[string]*LanguageConfig `yaml:"languages"`
 }
 
 func GetDefaultQuestion(questionPath string) *Question {
@@ -25,9 +25,9 @@ func GetDefaultQuestion(questionPath string) *Question {
 		MaxScore: 100,
 		OutLimit: 10,
 
-		AvailableLangs: make([]*LanguageConfig, 0),
-
 		Testcase: make([]*TestCase, 0),
+
+		AvailableLangs: make(map[string]*LanguageConfig, 0),
 	}
 }
 
