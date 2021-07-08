@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/rsharifnasab/DJ/pkg/judge"
+	"github.com/rsharifnasab/DJ/pkg/run"
 	"github.com/rsharifnasab/DJ/pkg/util"
 )
 
@@ -18,7 +19,6 @@ func Run() {
 	if err != nil {
 		panic(err)
 	}
-	//util.PrintStruct(rules)
 
 	question, err := judge.NewQuestion("./examples/Q1", rules)
 	if err != nil {
@@ -26,9 +26,20 @@ func Run() {
 	}
 	util.PrintStruct(question)
 
-	const submissionFile = "./examples/solution.cpp"
-	_ = submissionFile
-	// todo compile
+	submission, submitErr := run.NewSubmission("./examples/solution.cpp")
+	if submitErr != nil {
+		panic(submitErr)
+	}
+
+	util.PrintStruct(submission)
+	println(submission.SourceContent)
+
+	// load source
+	// which language
+	// apply rules
+	// compile, print compile errors
+	// for: run on all test cases
+	//   with tests count and out limit and ...
 
 	const compiledFile = "./examples/a.out"
 
