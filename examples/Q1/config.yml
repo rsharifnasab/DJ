@@ -2,9 +2,6 @@ name: Q1
 max_score: 110
 out_limit: 11
 
-all_langs: false
-# time, memory, rules
-
 languages:
   - lang: c
     time: 1000

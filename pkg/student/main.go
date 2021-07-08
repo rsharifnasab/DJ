@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
+	"sort"
 	"strings"
 	"time"
 
@@ -13,7 +15,7 @@ import (
 )
 
 type TestCase struct {
-	num int
+	Num int
 	// TODO: weight
 
 	InputFile  string
@@ -37,7 +39,6 @@ type Question struct {
 
 	Testcase []*TestCase
 
-	AllLangs       bool              `yaml:"all_langs"`
 	AvailableLangs []*LanguageConfig `yaml:"languages"`
 }
 
@@ -48,7 +49,6 @@ func GetDefaultQuestion(questionPath string) *Question {
 		MaxScore: 100,
 		OutLimit: 10,
 
-		AllLangs:       true,
 		AvailableLangs: make([]*LanguageConfig, 0),
 
 		Testcase: make([]*TestCase, 0),
@@ -69,31 +69,112 @@ func (question *Question) ruleNameToRule(rules *Rules) error {
 	return nil
 }
 
+const (
+	testsFolder = "tests/"
+	testsIn     = testsFolder + "in/"
+	testsOut    = testsFolder + "out/"
+)
+
+func (question *Question) GetTestsFolder() string {
+	return question.Path + "/" + testsFolder
+}
+
+func (question *Question) GetTestsInputFolder() string {
+	return question.Path + "/" + testsIn
+}
+
+func (question *Question) GetTestsOutputFolder() string {
+	return question.Path + "/" + testsOut
+}
+
+func (question *Question) GetInputFilePath(num int) string {
+	return fmt.Sprintf("%vinput%d.txt", question.GetTestsInputFolder(), num)
+}
+
+func (question *Question) GetOutputFilePath(num int) string {
+	return fmt.Sprintf("%voutput%d.txt", question.GetTestsOutputFolder(), num)
+}
+
+func (question *Question) NewTestCase(num int) *TestCase {
+	return &TestCase{
+		Num:        num,
+		InputFile:  question.GetInputFilePath(num),
+		OutputFile: question.GetOutputFilePath(num),
+	}
+}
+
+func (question *Question) CreateTestcases(count int) {
+	for i := 1; i <= count; i++ {
+		question.Testcase = append(question.Testcase, question.NewTestCase(i))
+	}
+
+}
+
+func GetTestNumFromInputFileName(name string) (int, error) {
+	var num int
+	n, scanfErr := fmt.Sscanf(name, "input%d.txt", &num)
+	if n != 1 || scanfErr != nil {
+		return 0, fmt.Errorf("%v : filename malformed", name)
+	} else {
+		return num, nil
+	}
+}
+
+func CheckFileExists(path string) error {
+	if stat, err := os.Stat(path); err != nil {
+		return fmt.Errorf("problem with file %v : %v", path, err)
+	} else if stat.IsDir() {
+		return fmt.Errorf("%v is a directory", path)
+	} else {
+		return nil
+	}
+}
+
+func CheckTestCasesInOrder(tests []int) error {
+	sort.Ints(tests)
+	if first := tests[0]; first != 1 {
+		return fmt.Errorf("first tests isn't 1, bit it's %v", first)
+	} else if last := tests[len(tests)-1]; last != len(tests) {
+		return fmt.Errorf("tests are not continues, last test is: %v", last)
+	} else {
+		return nil
+	}
+}
+
 func (question *Question) loadTestCases() error {
-	testsPath := question.Path + "/tests/"
-	inputFiles, readDirErr := ioutil.ReadDir(testsPath + "/in")
+	inputFiles, readDirErr := ioutil.ReadDir(question.GetTestsInputFolder())
 	if readDirErr != nil {
 		return readDirErr
 	}
 
-	for k, v := range inputFiles {
+	tests := make([]int, 0, 20)
+
+	for _, v := range inputFiles {
 		inpName := v.Name()
 
-		var num int
-		n, scanfErr := fmt.Sscanf(inpName, "input%d.txt", &num)
-		if n != 1 || scanfErr != nil {
-			return fmt.Errorf("input malformed")
+		inputFileErr := CheckFileExists(question.GetTestsInputFolder() + inpName)
+		if inputFileErr != nil {
+			return inputFileErr
 		}
 
-		// check isDir
-		// add to a slice
+		num, err := GetTestNumFromInputFileName(inpName)
+		if err != nil {
+			return err
+		}
 
-		fmt.Printf("%v : %v\n", k, num)
+		outputFileErr := CheckFileExists(question.GetOutputFilePath(num))
+		if outputFileErr != nil {
+			return outputFileErr
+		}
+
+		tests = append(tests, num)
 	}
-	// sort slice
-	// check min(slice)==1 and max(slice) == len(slice)
-	// each one = before+1
 
+	orderErr := CheckTestCasesInOrder(tests)
+	if orderErr != nil {
+		return orderErr
+	}
+	question.CreateTestcases(len(tests))
 	return nil
 }
 
