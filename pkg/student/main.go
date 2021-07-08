@@ -61,7 +61,7 @@ func (question *Question) ruleNameToRule(rules *Rules) error {
 		for _, ruleName := range lang.RuleNames {
 			ruleObj, foundRule := rules.Map[ruleName]
 			if !foundRule {
-				return fmt.Errorf("rulename [%v] doesn't exist", ruleName)
+				return fmt.Errorf("rulename %v doesn't exist", ruleName)
 			}
 			lang.Rules[ruleName] = &ruleObj
 		}
@@ -122,7 +122,7 @@ func GetTestNumFromInputFileName(name string) (int, error) {
 
 func CheckFileExists(path string) error {
 	if stat, err := os.Stat(path); err != nil {
-		return fmt.Errorf("problem with file %v : %v", path, err)
+		return err
 	} else if stat.IsDir() {
 		return fmt.Errorf("%v is a directory", path)
 	} else {
@@ -133,7 +133,7 @@ func CheckFileExists(path string) error {
 func CheckTestCasesInOrder(tests []int) error {
 	sort.Ints(tests)
 	if first := tests[0]; first != 1 {
-		return fmt.Errorf("first tests isn't 1, bit it's %v", first)
+		return fmt.Errorf("first tests isn't 1, it's %v", first)
 	} else if last := tests[len(tests)-1]; last != len(tests) {
 		return fmt.Errorf("tests are not continues, last test is: %v", last)
 	} else {
@@ -183,13 +183,11 @@ func NewQuestion(questionPath string, rules *Rules) (*Question, error) {
 
 	yamlData, loadErr := ioutil.ReadFile(questionPath + "/config.yml")
 	if loadErr != nil {
-		return nil, fmt.Errorf("cannot load config.yml in %v because:\n\t %v",
-			questionPath, loadErr)
+		return nil, loadErr
 	}
 	unmarshalErr := yaml.UnmarshalStrict(yamlData, &question)
 	if unmarshalErr != nil {
-		return nil, fmt.Errorf("cannot unmarshal config.yml file because:\n\t %v",
-			unmarshalErr)
+		return nil, unmarshalErr
 	}
 
 	if convertErr := question.ruleNameToRule(rules); convertErr != nil {
@@ -219,15 +217,13 @@ func LoadRules(rulesPath string) (*Rules, error) {
 	yamlData, loadErr := ioutil.ReadFile(rulesPath)
 
 	if loadErr != nil {
-		return nil, fmt.Errorf("cannot load %v because:\n\t %v",
-			rulesPath, loadErr)
+		return nil, loadErr
 	}
 	rules := &Rules{}
 
 	unmarshalErr := yaml.UnmarshalStrict(yamlData, &rules)
 	if unmarshalErr != nil {
-		return nil, fmt.Errorf("cannot unmarshal rules yml file because:\n\t %v",
-			unmarshalErr)
+		return nil, unmarshalErr
 	}
 
 	return rules, nil
