@@ -8,6 +8,15 @@
 
 -   chroot
 
+-  isolate (used in MOE and CMS) [+](https://github.com/ioi/isolate) and [+](http://www.ucw.cz/moe/isolate.1.html)
+
+-  compilebox (docker based but with js!) [+](https://github.com/remoteinterview/compilebox)
+[introduced here](https://www.linkedin.com/pulse/how-does-online-judge-works-ahmad-faiyaz/)
+
+
+worth read: [+](http://coldattic.info/post/40/) 
+and this perl script for timeout and mem usage [+](https://github.com/pshved/timeout)
+
 ---
 
 # lxd
@@ -76,4 +85,6 @@ roozbeh:1000000:65536
 + [github gist](https://gist.github.com/berndbausch/a6835150c7a26c88048763c0bd739be6) 
 
 + [publish image](https://ubuntu.com/blog/publishing-lxd-images)
+
++ [limiting resources](https://www.maketecheasier.com/limit-lxd-containers-resources/)
 
