@@ -3,6 +3,7 @@ package student
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os/exec"
 	"strings"
@@ -14,7 +15,31 @@ import (
 	"github.com/shirou/gopsutil/process"
 )
 
-func monitorMem(p *process.Process) {
+// recursive function to calculate whole process+childs memory usage
+func TotalMemoryUsage(p *process.Process) (uint64, error) {
+	currentMem, err := p.MemoryInfo()
+	if err != nil {
+		return 0, err
+	}
+
+	childs, err := p.Children()
+	if err != nil { // doesn't have child
+		return currentMem.RSS, nil
+	}
+
+	sum := currentMem.RSS
+	for _, child := range childs {
+		childUsage, err := TotalMemoryUsage(child)
+		if err != nil {
+			return sum, err
+		}
+		sum += childUsage
+	}
+
+	return sum, nil
+}
+
+func monitorMem(p *process.Process, memLimit uint64) {
 	// there is also linux only solution with setrlimit:
 	// read `man 2 prlimit`  and
 	// https://golang.hotexamples.com/examples/syscall/-/Setrlimit/golang-setrlimit-function-examples.html
@@ -25,20 +50,17 @@ func monitorMem(p *process.Process) {
 	// using https://pkg.go.dev/github.com/shirou/gopsutil/process#MemoryInfoStat
 
 	for {
-		// TODO: count all sub processes too
-		memInfo, err := p.MemoryInfo()
+		totalUsingMem, err := TotalMemoryUsage(p)
 		if err != nil {
-			println("error eccoured")
-			println(err.Error())
-			return
+			if fsErr, ok := err.(*fs.PathError); ok {
+				fmt.Printf("err type : %T\n err val : %v\nerror text : %v\n", fsErr, fsErr, fsErr.Error())
+				return
+			} else {
+				panic(err)
+			}
 		}
-		mem := memInfo.RSS / 1024 / 1024
-		println(mem)
-		println(memInfo.String())
-		if mem == 0 {
-			println("zero mem, shuttong down")
-			return
-		} else if mem > 100000000 {
+		println(totalUsingMem)
+		if totalUsingMem > memLimit {
 			err := p.Kill()
 			if err != nil {
 				panic(err)
@@ -46,7 +68,7 @@ func monitorMem(p *process.Process) {
 			println("killed by much mem usage")
 
 		}
-
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
@@ -87,6 +109,8 @@ func Run() {
 
 	const outLimit = /* 1024 * 1024 * */ 10
 
+	const memLimit = 12 * 1024 * 1024
+
 	//for i := 1; i <= testsCount; i++ {
 	for i := 2; i <= 2; i++ {
 		// quera use this:
@@ -126,7 +150,7 @@ func Run() {
 		if err != nil {
 			panic(err)
 		}
-		go monitorMem(process)
+		go monitorMem(process, memLimit)
 
 		outBuf := make([]byte, outLimit+1)
 		n, err := stdoutPipe.Read(outBuf)
