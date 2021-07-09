@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/rsharifnasab/DJ/pkg/run"
 	"gopkg.in/yaml.v2"
 )
 
@@ -11,21 +12,16 @@ type Rule struct {
 	Description string   `yaml:"description"`
 	Yes         []string `yaml:"yes"`
 	No          []string `yaml:"no"`
+	// TODO: add a sciprting language rule
 }
 
-type Rules struct {
-	// TODO: apply rules in smart way with chroma
-	// https://github.com/alecthomas/chroma#supported-languages
-	Map map[string]Rule `yaml:"rules"`
-}
-
-func LoadRules(rulesPath string) (*Rules, error) {
+func LoadRules(rulesPath string) (*run.Rules, error) {
 	yamlData, loadErr := ioutil.ReadFile(rulesPath)
 
 	if loadErr != nil {
 		return nil, loadErr
 	}
-	rules := &Rules{}
+	rules := make(map[string]*Rule)
 
 	unmarshalErr := yaml.UnmarshalStrict(yamlData, &rules)
 	if unmarshalErr != nil {
@@ -47,4 +43,8 @@ func (question *Question) ruleNameToRule(rules *Rules) error {
 		}
 	}
 	return nil
+}
+
+func (rule *Rule) Apply(source string) error {
+
 }

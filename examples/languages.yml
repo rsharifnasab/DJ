@@ -1,0 +1,15 @@
+- name: c
+  compile: "gcc -std=c11    -w -O2 -fomit-frame-pointer -lm -lpthread NAME.cpp -o compiled/a.exe",
+  run: "./compiled/a.exe"
+
+- name: cpp
+  compile: "g++ -std=c++17  -w -O2 -fomit-frame-pointer -lm  -pthread NAME.c  -o compiled/a.exe",
+  run: "./compiled/a.exe"
+
+- name: java
+  compile: "javac --release 11 -d compiled NAME.java",
+  run: "java -cp compiled NAME"
+
+- name: python
+  compile: ""
+  run: "python3 NAME.py"
