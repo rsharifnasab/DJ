@@ -25,6 +25,7 @@ func monitorMem(p *process.Process) {
 	// using https://pkg.go.dev/github.com/shirou/gopsutil/process#MemoryInfoStat
 
 	for {
+		// TODO: count all sub processes too
 		memInfo, err := p.MemoryInfo()
 		if err != nil {
 			println("error eccoured")

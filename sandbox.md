@@ -14,6 +14,10 @@
 [introduced here](https://www.linkedin.com/pulse/how-does-online-judge-works-ahmad-faiyaz/)
 
 
+-  vagrant:available for windows too, work with virtualbox backend
+[+](https://www.vagrantup.com/downloads)
+
+
 worth read: [+](http://coldattic.info/post/40/) 
 and this perl script for timeout and mem usage [+](https://github.com/pshved/timeout)
 
