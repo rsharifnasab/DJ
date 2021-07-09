@@ -1,8 +1,10 @@
-package judge
+package question
 
 import (
+	"fmt"
 	"io/ioutil"
 
+	"github.com/rsharifnasab/DJ/pkg/judge"
 	"gopkg.in/yaml.v2"
 )
 
@@ -45,14 +47,18 @@ func (question *Question) ReadConfigFile() error {
 	return nil
 }
 
-func NewQuestion(questionPath string, rules *Rules) (*Question, error) {
+func (question *Question) lookuplanguageconfigs(judge *judge.Judge) error {
+	return nil
+}
+
+func NewQuestion(questionPath string, judge *judge.Judge) (*Question, error) {
 	question := GetDefaultQuestion(questionPath)
 
 	if loadErr := question.ReadConfigFile(); loadErr != nil {
 		return nil, loadErr
 	}
 
-	if convertErr := question.ruleNameToRule(rules); convertErr != nil {
+	if convertErr := question.ruleNameToRule(judge.Rules); convertErr != nil {
 		return nil, convertErr
 	}
 
@@ -60,5 +66,23 @@ func NewQuestion(questionPath string, rules *Rules) (*Question, error) {
 		return nil, testCaseErr
 	}
 
+	if langErr := question.lookuplanguageconfigs(judge); langErr != nil {
+		return nil, langErr
+	}
+
 	return question, nil
+}
+
+func (question *Question) ruleNameToRule(rules map[string]*judge.Rule) error {
+	for _, lang := range question.AvailableLangs {
+		lang.Rules = make(map[string]*judge.Rule, 0)
+		for _, ruleName := range lang.RuleNames {
+			ruleObj, foundRule := rules[ruleName]
+			if !foundRule {
+				return fmt.Errorf("rulename %v doesn't exist", ruleName)
+			}
+			lang.Rules[ruleName] = ruleObj
+		}
+	}
+	return nil
 }

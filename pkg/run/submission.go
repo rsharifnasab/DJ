@@ -7,7 +7,9 @@ import (
 )
 
 type Submission struct {
-	Language      string
+	LanguageName string
+	//Language     *judge.Language
+
 	SourcePath    string
 	SourceContent string
 }
@@ -21,7 +23,7 @@ func NewSubmission(sourcePath string) (*Submission, error) {
 	submission := &Submission{
 		SourcePath:    sourcePath,
 		SourceContent: string(sourceContent),
-		Language:      strings.Trim(filepath.Ext(sourcePath), "."),
+		LanguageName:  strings.Trim(filepath.Ext(sourcePath), "."),
 	}
 	return submission, nil
 }

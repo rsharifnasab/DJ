@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/rsharifnasab/DJ/pkg/judge"
+	"github.com/rsharifnasab/DJ/pkg/question"
 	"github.com/rsharifnasab/DJ/pkg/run"
 	"github.com/rsharifnasab/DJ/pkg/util"
 	"github.com/shirou/gopsutil/process"
@@ -74,12 +75,13 @@ func monitorMem(p *process.Process, memLimit uint64) {
 
 func Run() {
 
-	rules, err := judge.LoadRules("./examples/rules.yml")
+	judge, err := judge.InitJudge("./examples")
 	if err != nil {
 		panic(err)
 	}
+	util.PrintStruct(judge)
 
-	question, err := judge.NewQuestion("./examples/Q1", rules)
+	question, err := question.NewQuestion("./examples/Q1", judge)
 	if err != nil {
 		panic(err)
 	}
@@ -92,7 +94,7 @@ func Run() {
 
 	util.PrintStruct(submission)
 	//println(submission.SourceContent)
-	util.PrintStruct(question.AvailableLangs[submission.Language])
+	util.PrintStruct(question.AvailableLangs[submission.LanguageName])
 	println("\n----------\n")
 
 	// which language
