@@ -2,7 +2,7 @@ package judge
 
 type Judge struct {
 	BasePath  string
-	Languages []*Language
+	Compilers []*Compiler
 	Rules     map[string]*Rule
 }
 
@@ -11,7 +11,7 @@ func InitJudge(judgeConfigPath string) (*Judge, error) {
 		BasePath: judgeConfigPath + "/",
 	}
 
-	if err := judge.LoadLanguages(); err != nil {
+	if err := judge.LoadCompilers(); err != nil {
 		return nil, err
 	}
 	if err := judge.LoadRules(); err != nil {

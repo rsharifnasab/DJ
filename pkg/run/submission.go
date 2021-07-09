@@ -15,6 +15,7 @@ type Submission struct {
 }
 
 func NewSubmission(sourcePath string) (*Submission, error) {
+	// TODO: get question and select proper LanguageConfig from file type
 	sourceContent, readErr := ioutil.ReadFile(sourcePath)
 	if readErr != nil {
 		return nil, readErr

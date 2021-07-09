@@ -13,5 +13,5 @@ type LanguageConfig struct {
 	RuleNames []string               `yaml:"rules"`
 	Rules     map[string]*judge.Rule `yaml:"NONE"`
 
-	Language *judge.Language `yaml:"NONE2"`
+	Compiler *judge.Compiler `yaml:"NONE2"`
 }
