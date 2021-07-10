@@ -10,6 +10,6 @@
   compile: "javac --release 11 -d compiled NAME.java"
   run: "java -cp compiled NAME"
 
-- name: python
+- name: py
   compile: ""
   run: "python3 NAME.py"

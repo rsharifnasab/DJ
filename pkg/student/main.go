@@ -162,6 +162,13 @@ func Run() {
 		}
 		out := outBuf[:n]
 
+		err = stdoutPipe.Close()
+		if err != nil {
+			panic(err)
+		}
+		// TODO check how it is working
+		// and how HEAD works
+
 		// finished flag become true
 		// and get probable error
 		err = cmd.Wait()
