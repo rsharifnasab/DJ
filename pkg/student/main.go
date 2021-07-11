@@ -53,8 +53,8 @@ func monitorMem(p *process.Process, memLimit uint64) {
 	for {
 		totalUsingMem, err := TotalMemoryUsage(p)
 		if err != nil {
-			if fsErr, ok := err.(*fs.PathError); ok {
-				fmt.Printf("err type : %T\n err val : %v\nerror text : %v\n", fsErr, fsErr, fsErr.Error())
+			if _, ok := err.(*fs.PathError); ok {
+				//fmt.Printf("err type : %T\n err val : %v\nerror text : %v\n", fsErr, fsErr, fsErr.Error())
 				return
 			} else {
 				panic(err)
@@ -114,7 +114,7 @@ func Run() {
 	const memLimit = 12 * 1024 * 1024
 
 	//for i := 1; i <= testsCount; i++ {
-	for i := 2; i <= 2; i++ {
+	for i := 1; i <= 7; i++ {
 		// quera use this:
 		// https://github.com/mjnaderi/Sharif-Judge/blob/Version-1/tester/runcode.sh
 		testInpAddr := fmt.Sprintf("./examples/Q1/tests/in/input%d.txt", i)
@@ -137,7 +137,6 @@ func Run() {
 		}
 
 		stdoutPipe, err := cmd.StdoutPipe()
-		stdoutPipe.Close()
 		if err != nil {
 			panic(err)
 		}
