@@ -97,6 +97,10 @@ func Run() {
 	util.PrintStruct(question.AvailableLangs[submission.LanguageName])
 	println("\n----------\n")
 
+	//runExampleTests()
+}
+
+func runExampleTests() {
 	// which language
 	// apply rules
 	// compile, print compile errors
@@ -115,7 +119,7 @@ func Run() {
 
 	//for i := 1; i <= testsCount; i++ {
 	for i := 1; i <= 7; i++ {
-		// quera use this:
+		// sharif-judge use this:
 		// https://github.com/mjnaderi/Sharif-Judge/blob/Version-1/tester/runcode.sh
 		testInpAddr := fmt.Sprintf("./examples/Q1/tests/in/input%d.txt", i)
 		testInpData, err := ioutil.ReadFile(testInpAddr)
@@ -187,6 +191,7 @@ func Run() {
 
 		println()
 	}
+
 }
 
 /*

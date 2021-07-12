@@ -13,3 +13,7 @@
 - name: py
   compile: ""
   run: "python3 NAME.py"
+
+- name: junit
+  compile: "compile.bash NAME"
+  run: "run.bash"
