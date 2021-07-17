@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/rsharifnasab/DJ/pkg/judge"
@@ -52,14 +53,17 @@ func monitorMem(p *process.Process, memLimit uint64) {
 
 	for {
 		totalUsingMem, err := TotalMemoryUsage(p)
-		if err != nil {
-			if _, ok := err.(*fs.PathError); ok {
-				//fmt.Printf("err type : %T\n err val : %v\nerror text : %v\n", fsErr, fsErr, fsErr.Error())
-				return
-			} else {
-				panic(err)
-			}
+		switch err.(type) {
+		case nil: // no error
+			break
+		case *fs.PathError, syscall.Errno:
+			// linux: process in proc not found
+			// windows, systemcall not found
+			return
+		default:
+			panic(err)
 		}
+
 		println(totalUsingMem)
 		if totalUsingMem > memLimit {
 			err := p.Kill()
@@ -97,7 +101,7 @@ func Run() {
 	util.PrintStruct(question.AvailableLangs[submission.LanguageName])
 	println("\n----------\n")
 
-	//runExampleTests()
+	runExampleTests()
 }
 
 func runExampleTests() {
