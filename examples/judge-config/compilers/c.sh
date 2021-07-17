@@ -3,9 +3,12 @@
 set -o errexit
 set -o nounset
 
-command=@1
 
-filename=@2
+command=$1
+echo $command
+
+filename=$2
+echo $filename
 
 if [ $command = "compile" ]; then
     echo "compile"
@@ -13,8 +16,6 @@ if [ $command = "compile" ]; then
 elif [ "$command" = "run" ]; then
     echo "run"
     ./compild/a.exe
-else 
+else
     echo "error"
 fi
-
-
