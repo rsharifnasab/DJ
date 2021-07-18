@@ -3,14 +3,14 @@
 set -o errexit
 set -o nounset
 
-command=@1
+command=$1
 
-filename=@2
+filename=$2
 
-if [ $command = "compile" ]; then
+if [ "$command" = "compile" ]; then
     echo "compile"
 
-    javac --release 11 -d "compiled" $filename
+    javac --release 11 -d "compiled" "$filename"
 
 elif [ "$command" = "run" ]; then
     echo "run"

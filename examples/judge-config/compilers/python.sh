@@ -3,11 +3,11 @@
 set -o errexit
 set -o nounset
 
-command=@1
+command=$1
 
-filename=@2
+filename=$2
 
-if [ $command = "compile" ]; then
+if [ "$command" = "compile" ]; then
     echo "compile"
 
     #TODO: compile python!
@@ -15,7 +15,7 @@ if [ $command = "compile" ]; then
 elif [ "$command" = "run" ]; then
     echo "run"
 
-    python3 $filename
+    python3 "$filename"
 
 else
     echo "error"

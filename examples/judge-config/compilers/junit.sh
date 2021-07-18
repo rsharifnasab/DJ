@@ -3,14 +3,14 @@
 set -o errexit
 set -o nounset
 
-command=@1
+command=$1
 
-filename=@2
+folderPath=$2
 
-if [ $command = "compile" ]; then
+if [ "$command" = "compile" ]; then
     echo "compile"
 
-    find $filename -name "*.java" > compiled/sources.txt
+    find "$folderPath" -name "*.java" > compiled/sources.txt
 
     cp ./*.jar compiled
     javac --release 11 -cp .:junit-platform-console.jar:hamcrest.jar @compiled/sources.txt -d "compiled"
