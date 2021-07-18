@@ -18,6 +18,8 @@
 [+](https://www.vagrantup.com/downloads)
 
 
+-  firecracker: VM but really fast to boot [+](https://jvns.ca/blog/2021/01/23/firecracker--start-a-vm-in-less-than-a-second/)
+
 worth read: [+](http://coldattic.info/post/40/) 
 and this perl script for timeout and mem usage [+](https://github.com/pshved/timeout)
 
