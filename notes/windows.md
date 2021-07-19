@@ -21,79 +21,90 @@ or what?!
     -   "bash" is not already in path, some other executable is.
     -   add whole bin folder to path? polute the PATH
 
-
-
 -   msys2
-    - arch based 
-    - they need to install packages (gcc, g++ and more) with pacman -Syu 
-    - I think needs really much internet and time.
 
+    -   arch based
+    -   they need to install packages (gcc, g++ and more) with pacman -Syu
+    -   I think needs really much internet and time.
 
--   tools
-    -   choco: really good installer install with one command (need powershell as administrator)
-    -   cygwin installer script
-        [+](https://github.com/miguelgrinberg/cygwin-installer/blob/master/install-cygwin.bat) and
-        [+](https://github.com/rtwolf/cygwin-auto-install/blob/master/cygwin-install.bat) and
-        [+](https://github.com/vegardit/cygwin-portable-installer)
-    - need dos2unix for running scripts :) could be installed with cygwin
-    
-    - [+](add sth to path)
+-   tools - choco: really good installer install with one command (need powershell as administrator) - cygwin installer script
+    [+](https://github.com/miguelgrinberg/cygwin-installer/blob/master/install-cygwin.bat) and
+    [+](https://github.com/rtwolf/cygwin-auto-install/blob/master/cygwin-install.bat) and
+    [+](https://github.com/vegardit/cygwin-portable-installer) - need dos2unix for running scripts :) could be installed with cygwin
 
+```
+C:\cygwin\bin\dos2unix testit.sh
+find . -type f -exec dos2unix.exe {} \;
+setup-x86_64.exe -q -P dos2unix
+```
 
-
+        - [+](add sth to path)
 
 ## draft HOW-TO install
 
 1. install chocolaty
-  + you can install from [here](https://chocolatey.org/install)
-  + tldr: open powershell as administrator and run this
+
+-   you can install from [here](https://chocolatey.org/install)
+-   tldr: open powershell as administrator and run this
+
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 ```
 
 2. install needed software with chocolaty
-  + open another powershell as administrator 
-  + choco install cygwin cyg-get # chocolateygui? vscode? mingw?
-  + press `A` to accept all
 
+-   open another powershell as administrator
+-   choco install cygwin cyg-get # chocolateygui? vscode? mingw?
+-   press `A` to accept all
 
 3. add cygwin bin folder to PATH
-  + find cygwin installation foler (the hard part, maybe I distribute cygwin myself like mingw)
-  + copy path for example `C:\cygwin64\bin\`
-  + search `edit system environment variables` and open it
-  + look into the second half (System variables part)
-  + open `PATH` for edit
-  + add copied path at the end:
+
+-   find cygwin installation foler (the hard part, maybe I distribute cygwin myself like mingw)
+-   copy path for example `C:\cygwin64\bin\`
+-   search `edit system environment variables` and open it
+-   look into the second half (System variables part)
+-   open `PATH` for edit
+-   add copied path at the end:
     windows 10: create new entry
     other windows: enter a ";" and paste after that
 
-
 4. install needed software with cyg-get
-  + open normal cmd 
-  + run this command:
+
+-   open normal cmd
+-   run this command:
+
 ```batch
-cyg-get install dos2unix g++ 
+cyg-get install dos2unix g++
 ```
 
-
 5. test compiler and bash in cmd
-  + run `g++ --version` and see the output
-  + run `bash -c "g++ --version"`
+
+-   run `g++ --version` and see the output
+-   run `bash -c "g++ --version"`
 
 6. test all together
 
-+ create a cpp hello-world file named `a.cpp`
-+ put this in a file named `a.bash`
+-   create a cpp hello-world file named `a.cpp`
+-   put this in a file named `a.bash`
 
 ```bash
 g++ "$1" -o "a.exe"
 ./a.exe
 ```
 
-+ open a cmd in same directory as `a.bash` and `a.cpp`
-+ run this
+-   open a cmd in same directory as `a.bash` and `a.cpp`
+-   run this
 
 ```batch
-dos2unix a.bash 
+dos2unix a.bash
 bash a.bash a.cpp
 ```
+
+---
+
+-   other options:
+    -   docker: windows7?
+    -   wsl: window7?
+    -   create bash.cmd in system32 that points to cygwin bin folder (instead of adding whole folder to path) [+](https://stackoverflow.com/a/14323360/10999348)
+    -   script with lua/python (solve which problem?)
+    -   ant: create compile and run scripts with and xmls, every body needs to install jvm and ant
