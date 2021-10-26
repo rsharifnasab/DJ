@@ -99,3 +99,15 @@ roozbeh:1000000:65536
 # linux cgroups
 
 - [this simple zine](https://wizardzines.com/comics/containers-arent-magic/)
+
+---
+
+- [firejail](https://firejail.wordpress.com/)
+  - easy to install in any distro (c-based)
+  - easy to config
+  - use on any kernel > 3.x
+  - TA can write a profile file for the program
+  - lightwieght and fast
+  - [man page](https://firejail.wordpress.com/features-3/man-firejail/)
+  - [basic usage](https://firejail.wordpress.com/documentation-2/basic-usage/)
+  - by default protext other folders than home dir and important files in the home
