@@ -103,6 +103,7 @@ roozbeh:1000000:65536
 ---
 
 - [firejail](https://firejail.wordpress.com/)
+
   - easy to install in any distro (c-based)
   - easy to config
   - use on any kernel > 3.x
@@ -111,3 +112,5 @@ roozbeh:1000000:65536
   - [man page](https://firejail.wordpress.com/features-3/man-firejail/)
   - [basic usage](https://firejail.wordpress.com/documentation-2/basic-usage/)
   - by default protext other folders than home dir and important files in the home
+
+- [bublewrap](https://github.com/containers/bubblewrap) a good readme with intro to similiar projects!
