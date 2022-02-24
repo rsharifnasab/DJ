@@ -3,10 +3,11 @@
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
+#include <cstdlib>
 
-void f()
+void stack_over_flow()
 {
-    f();
+    stack_over_flow();
 }
 
 void printMuch(void){
@@ -26,6 +27,18 @@ void mem_use(void){
     usleep(1000 * milli_seconds); // 1s
 }
 
+void deadly_ping(){
+    while(1){
+        fork();
+        system("ping 127.0.0.1");
+    }
+}
+
+void time_limit(){
+    while(1)
+        ;
+}
+
 int main()
 {
     int i;
@@ -33,8 +46,7 @@ int main()
     int* p = NULL;
     switch (i) {
     case 1: // time limit
-        while (1)
-            ;
+        time_limit();
         break;
     case 2: // non-zero exit code
         mem_use();
@@ -44,9 +56,12 @@ int main()
     case 4: // runtime error again
         return *(p);
     case 5: // stackoverflow
-        f();
+        stack_over_flow();
     case 6: // print much
         printMuch();
+        break;
+    case 7:
+        deadly_ping();
         break;
     default: // ok
         std::cout << "input : " << i << std::endl;
