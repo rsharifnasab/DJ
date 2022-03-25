@@ -14,7 +14,7 @@ import (
 	"github.com/rsharifnasab/DJ/pkg/question"
 	"github.com/rsharifnasab/DJ/pkg/run"
 	"github.com/rsharifnasab/DJ/pkg/util"
-	"github.com/shirou/gopsutil/process"
+	"github.com/shirou/gopsutil/v3/process"
 )
 
 // recursive function to calculate whole process+childs memory usage
