@@ -29,3 +29,10 @@ other significant judges that we can learn from:
   - design notes [+](https://github.com/pc2ccs/pc2v9/wiki/PC2-Design)
   - online judge with custom validator
   - have project config yaml examples [+](https://github.com/pc2ccs/pc2v9/wiki/YAML-Contest-Configuration)
+
+
+- EXecutioner
+  - implemented in python 
+  - using firejail as sandbox provider
+  - good structure for setting.yaml
+  - source code on github [+](https://github.com/iCodeDevs/EXecutioner)
