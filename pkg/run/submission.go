@@ -1,30 +1,17 @@
 package run
 
-import (
-	"io/ioutil"
-	"path/filepath"
-	"strings"
-)
-
 type Submission struct {
-	LanguageName string
-	//Language     *judge.Language
-
-	SourcePath    string
-	SourceContent string
+	Path     string
+	Runner   string
+	Question string
 }
 
-func NewSubmission(sourcePath string) (*Submission, error) {
-	// TODO: get question and select proper LanguageConfig from file type
-	sourceContent, readErr := ioutil.ReadFile(sourcePath)
-	if readErr != nil {
-		return nil, readErr
-	}
+func NewSubmission(path, runner, question string) *Submission {
 
 	submission := &Submission{
-		SourcePath:    sourcePath,
-		SourceContent: string(sourceContent),
-		LanguageName:  strings.Trim(filepath.Ext(sourcePath), "."),
+		Path:     path,
+		Runner:   runner,
+		Question: question,
 	}
-	return submission, nil
+	return submission
 }

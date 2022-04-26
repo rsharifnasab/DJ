@@ -12,7 +12,6 @@ import (
 
 	"github.com/rsharifnasab/DJ/pkg/judge"
 	"github.com/rsharifnasab/DJ/pkg/question"
-	"github.com/rsharifnasab/DJ/pkg/run"
 	"github.com/rsharifnasab/DJ/pkg/util"
 	"github.com/shirou/gopsutil/v3/process"
 )
@@ -91,17 +90,16 @@ func Run() {
 	}
 	util.PrintStruct(question)
 
-	submission, submitErr := run.NewSubmission("./examples/solution.cpp")
-	if submitErr != nil {
-		panic(submitErr)
-	}
+	/*
+		submission := run.NewSubmission("./examples/solution.cpp")
 
-	util.PrintStruct(submission)
-	//println(submission.SourceContent)
-	util.PrintStruct(question.AvailableLangs[submission.LanguageName])
-	println("\n----------\n")
+		util.PrintStruct(submission)
+		//println(submission.SourceContent)
+		util.PrintStruct(question.AvailableLangs[submission.LanguageName])
+		println("\n----------\n")
 
-	runExampleTests()
+		runExampleTests()
+	*/
 }
 
 func runExampleTests() {

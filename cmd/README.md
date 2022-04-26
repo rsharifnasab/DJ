@@ -1,2 +1,2 @@
-just little main for application
+Little main for application
 

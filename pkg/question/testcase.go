@@ -1,11 +1,11 @@
 package question
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"sort"
-
-	"github.com/rsharifnasab/DJ/pkg/util"
 )
 
 type TestCase struct {
@@ -42,6 +42,11 @@ func CheckTestCasesInOrder(tests []int) error {
 	}
 }
 
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	return !errors.Is(err, os.ErrNotExist)
+}
+
 func (question *Question) loadTestCases() error {
 	inputFiles, readDirErr := ioutil.ReadDir(question.GetTestsInputFolder())
 	if readDirErr != nil {
@@ -53,18 +58,16 @@ func (question *Question) loadTestCases() error {
 	for _, v := range inputFiles {
 		inpName := v.Name()
 
-		inputFileErr := util.CheckFileExists(question.GetTestsInputFolder() + inpName)
-		if inputFileErr != nil {
-			return inputFileErr
+		if !exists(question.GetTestsInputFolder() + inpName) {
+			return fmt.Errorf("input file %v doesn't exist", inpName)
 		}
 
 		num, err := GetTestNumFromInputFileName(inpName)
 		if err != nil {
 			return err
 		}
-		outputFileErr := util.CheckFileExists(question.GetOutputFilePath(num))
-		if outputFileErr != nil {
-			return outputFileErr
+		if !exists(question.GetOutputFilePath(num)) {
+			return fmt.Errorf("output file %v doesn't exist", inpName)
 		}
 
 		tests = append(tests, num)
