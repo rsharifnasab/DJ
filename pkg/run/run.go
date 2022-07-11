@@ -36,7 +36,7 @@ func totalMemoryUsage(p *process.Process) (uint64, error) {
 	return sum, nil
 }
 
-func monitorMem(p *process.Process, memLimit uint64, result chan uint64, cancel chan int) {
+func monitorMem(p *process.Process, memLimit uint64, result chan uint64) {
 	// there is also linux only solution with setrlimit:
 	// read `man 2 prlimit`  and
 	// https://golang.hotexamples.com/examples/syscall/-/Setrlimit/golang-setrlimit-function-examples.html
@@ -70,15 +70,6 @@ func monitorMem(p *process.Process, memLimit uint64, result chan uint64, cancel 
 			return
 		}
 
-		/*
-			select {
-			case <-cancel:
-				panic("monitor didn't finished, shouldnt reach here")
-			default:
-			}
-		*/
-
-		//time.Sleep(100 * time.Millisecond)
 		time.Sleep(50 * time.Millisecond)
 	}
 }
@@ -90,19 +81,10 @@ func Run(command string, outLimit int, memLimit uint64, timeout time.Duration) (
 	// for: run on all test cases
 	//   with tests count and out limit and ...
 
-	//const command = "./examples/a.out"
-
-	//const timeout = 2 * time.Second
-
-	//const outLimit = /* 1024 * 1024 * */ 10
-
-	//const memLimit = 12 * 1024 * 1024
-
 	// sharif-judge use this:
 	// https://github.com/mjnaderi/Sharif-Judge/blob/Version-1/tester/runcode.sh
 
 	memUsage := make(chan uint64)
-	memMonitorCancel := make(chan int, 1)
 
 	words, err := shellquote.Split(command)
 	if err != nil {
@@ -136,7 +118,7 @@ func Run(command string, outLimit int, memLimit uint64, timeout time.Duration) (
 	pid := execCmd.Process.Pid
 	process, err := process.NewProcess(int32(pid))
 	cobra.CheckErr(err)
-	go monitorMem(process, memLimit, memUsage, memMonitorCancel)
+	go monitorMem(process, memLimit, memUsage)
 
 	bytesRead, err := stdoutPipe.Read(outBuf)
 	if bytesRead == outLimit+1 {
@@ -155,8 +137,6 @@ func Run(command string, outLimit int, memLimit uint64, timeout time.Duration) (
 	// finished flag become true
 	// and check for any error
 	executeErr := execCmd.Wait()
-
-	memMonitorCancel <- 1
 
 	//println("stderr:")
 	//println(string(errBuf[:stderrN]))

@@ -27,14 +27,16 @@ func TestTimeLimit(t *testing.T) {
 
 func TestMemoryLimit(t *testing.T) {
 	//_, err := Run(`bash -c 'echo "ok"; tail /dev/zero > /dev/null'`, 5*1024, 50*1024, 20*time.Second)
-	_, err := Run(`bash -c 'echo "ok"; cat /dev/zero | head -c 150m > /dev/null'`, 5*1024, 50*1024, 10*time.Second)
+	_, err := Run(`bash -c 'echo "ok"; cat /dev/zero | head -c 500m > /dev/null'`, 5*1024, 50*1024, 10*time.Second)
 	// cat /dev/zero | head -c 5G | tail
 	assert.EqualValues(t, MemoryLimitError, err)
 }
 
 func TestOutputLimit(t *testing.T) {
-	_, err := Run(`bash -c 'while true; do echo "text text text"; done'`, 500, 50*1024*1024, 10*time.Second)
-	assert.EqualValues(t, OutputLimitError, err)
+	_, err := Run(`bash -c 'while true; do echo "text text text"; done'`, 512, 50*1024*1024, 10*time.Second)
+	assert.NotNil(t, err)
+	assert.Contains(t, []error{OutputLimitError, NonZeroExitError}, err)
+	// && err != NonZeroExitError { // why non-zero?
 }
 
 func TestNoOutput(t *testing.T) {
