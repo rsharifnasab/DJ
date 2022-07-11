@@ -36,7 +36,7 @@ func totalMemoryUsage(p *process.Process) (uint64, error) {
 	return sum, nil
 }
 
-func monitorMem(p *process.Process, memLimit uint64) {
+func monitorMem(p *process.Process, memLimit uint64, result chan uint64, cancel chan int) {
 	// there is also linux only solution with setrlimit:
 	// read `man 2 prlimit`  and
 	// https://golang.hotexamples.com/examples/syscall/-/Setrlimit/golang-setrlimit-function-examples.html
@@ -59,16 +59,27 @@ func monitorMem(p *process.Process, memLimit uint64) {
 			panic(err)
 		}
 
-		println(totalUsingMem)
+		print("mem usage (KB) : ")
+		println(totalUsingMem / 1024)
 		if totalUsingMem > memLimit {
 			err := p.Kill()
 			if err != nil {
 				panic(err)
 			}
-			println("killed by much mem usage")
-
+			result <- totalUsingMem
+			return
 		}
-		time.Sleep(100 * time.Millisecond)
+
+		/*
+			select {
+			case <-cancel:
+				panic("monitor didn't finished, shouldnt reach here")
+			default:
+			}
+		*/
+
+		//time.Sleep(100 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 	}
 }
 
@@ -90,6 +101,9 @@ func Run(command string, outLimit int, memLimit uint64, timeout time.Duration) (
 	// sharif-judge use this:
 	// https://github.com/mjnaderi/Sharif-Judge/blob/Version-1/tester/runcode.sh
 
+	memUsage := make(chan uint64)
+	memMonitorCancel := make(chan int, 1)
+
 	words, err := shellquote.Split(command)
 	if err != nil {
 		return "", MalformedCommandError
@@ -97,53 +111,77 @@ func Run(command string, outLimit int, memLimit uint64, timeout time.Duration) (
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel() // cleanup resources eventually
-	// Create the command with our context
-	cmd := exec.CommandContext(ctx, words[0], words[1:]...)
 
-	stdinWriter, err := cmd.StdinPipe()
+	// Create the command with our context
+	execCmd := exec.CommandContext(ctx, words[0], words[1:]...)
+
+	stdinWriter, err := execCmd.StdinPipe()
 	cobra.CheckErr(err)
 	_ = stdinWriter
 	//_, err = stdinWriter.Write(testInpData)
 	//cobra.CheckErr(err)
 
-	stdoutPipe, err := cmd.StdoutPipe()
+	stdoutPipe, err := execCmd.StdoutPipe()
+	cobra.CheckErr(err)
+	outBuf := make([]byte, outLimit+1)
+
+	stderrPipe, err := execCmd.StderrPipe()
+	cobra.CheckErr(err)
+	errBuf := make([]byte, outLimit+1)
+
+	// finally start the process!
+	err = execCmd.Start()
 	cobra.CheckErr(err)
 
-	err = cmd.Start()
-	cobra.CheckErr(err)
-
-	pid := cmd.Process.Pid
+	pid := execCmd.Process.Pid
 	process, err := process.NewProcess(int32(pid))
 	cobra.CheckErr(err)
-	go monitorMem(process, memLimit)
+	go monitorMem(process, memLimit, memUsage, memMonitorCancel)
 
-	outBuf := make([]byte, outLimit+1)
 	bytesRead, err := stdoutPipe.Read(outBuf)
-
 	if bytesRead == outLimit+1 {
 		return "", OutputLimitError
-	} else if bytesRead == 0 {
-		return "", NoOutputError
 	}
 	out := outBuf[:bytesRead]
 
 	err = stdoutPipe.Close()
 	cobra.CheckErr(err)
-	// TODO check how it is working
+
+	stderrN, err := stderrPipe.Read(errBuf)
+	_ = stderrN
+	err = stderrPipe.Close()
+	cobra.CheckErr(err)
 
 	// finished flag become true
 	// and check for any error
-	err = cmd.Wait()
+	executeErr := execCmd.Wait()
+
+	memMonitorCancel <- 1
+
+	//println("stderr:")
+	//println(string(errBuf[:stderrN]))
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return "", TimedOutError
+	} else if ctx.Err() != nil {
+		panic(err)
 	}
 
-	if err != nil {
+	select {
+	case <-memUsage:
+		return "", MemoryLimitError
+	default:
+
+	}
+
+	if executeErr != nil {
 		return "", NonZeroExitError
 	}
 
 	outStr := string(out)
+	if bytesRead == 0 {
+		return outStr, NoOutputError
+	}
 
 	return outStr, nil
 }

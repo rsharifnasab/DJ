@@ -6,6 +6,7 @@ var (
 	//CompileError     error = fmt.Errorf("Compile Error: The code cound't be compiled.")
 	NonZeroExitError      error = fmt.Errorf("NonZero Exit: The code finished with exit code != 0")
 	OutputLimitError      error = fmt.Errorf("Output Limit: Produced output is more that expected.")
+	MemoryLimitError      error = fmt.Errorf("Memory Limit: The code is using too much memory.")
 	TimedOutError         error = fmt.Errorf("Timed Out: the code did'nt complete execution in time")
 	NoOutputError         error = fmt.Errorf("No Output: The Code doesn't have any output")
 	MalformedCommandError error = fmt.Errorf("Malformed Command: The provided command is malformed")
