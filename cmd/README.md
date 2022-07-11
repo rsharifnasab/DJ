@@ -1,2 +1,0 @@
-Little main for application
-

@@ -10,8 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/rsharifnasab/DJ/pkg/judge"
-	"github.com/rsharifnasab/DJ/pkg/question"
 	"github.com/rsharifnasab/DJ/pkg/util"
 	"github.com/shirou/gopsutil/v3/process"
 )
