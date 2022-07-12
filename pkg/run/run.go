@@ -27,6 +27,7 @@ func totalMemoryUsage(p *process.Process) (uint64, error) {
 
 	sum := currentMem.RSS
 	for _, children := range child {
+		// TODO: check, what if error in child?
 		childrenUsage, err := totalMemoryUsage(children)
 		if err != nil {
 			return 0, err

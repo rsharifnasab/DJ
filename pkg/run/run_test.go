@@ -15,6 +15,8 @@ func TestOutput(t *testing.T) {
 	assert.Equal(t, "hello world\n", out)
 }
 
+// TODO: refactor run with justTun, so there are no extra args
+
 func TestStderr(t *testing.T) {
 	stdout, stderr, err := Run(`bash -c '1>&2 echo "hello err"; echo "hello out"'`, 5*1024, 50*1024*1024, 100*time.Millisecond)
 	assert.Nil(t, err)

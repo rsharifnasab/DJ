@@ -1,10 +1,12 @@
 package judge
 
 import (
+	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/plus3it/gorecurcopy"
 	"github.com/rsharifnasab/DJ/pkg/run"
 	"github.com/spf13/cobra"
 )
@@ -25,10 +27,21 @@ func numberOfTests(judgerPath string) int {
 	cobra.CheckErr(err)
 	return n
 }
+func makeTempfolder() string {
+	tmpFolder, err := ioutil.TempDir("", "djtmp*")
+	cobra.CheckErr(err)
+	return tmpFolder
+}
 
-func judge(judgerPath string) {
+func copyLibFiles(judgerPath, tmpFolder string) {
+	gorecurcopy.CopyDirectory(judgerPath+"/lib", tmpFolder)
+}
+
+func judge(judgerPath string, submissionPath string) {
 	checkReq(judgerPath)
+	tmpFolder := makeTempfolder()
+	copyLibFiles(judgerPath, tmpFolder)
 
 	noOfTests := numberOfTests(judgerPath)
-	println(noOfTests)
+	_ = noOfTests
 }
