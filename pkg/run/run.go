@@ -99,7 +99,12 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 
 	// initialize stdin, but we don't write anything by now
 	stdinWriter, err := execCmd.StdinPipe()
-	cobra.CheckErr(err)
+	if err != nil {
+		print("err : ")
+		println(err.Error())
+		//cobra.CheckErr(err)
+		panic(err)
+	}
 	_ = stdinWriter
 	//_, err = stdinWriter.Write(testInpData)
 	//cobra.CheckErr(err)
@@ -115,7 +120,15 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 
 	// finally start the process!
 	err = execCmd.Start()
-	cobra.CheckErr(err)
+	if err != nil {
+		switch err.(type) {
+		case *fs.PathError:
+			return "", "", NotValidExecutableError
+
+		default:
+			cobra.CheckErr(err)
+		}
+	}
 
 	pid := execCmd.Process.Pid
 	go monitorMem(pid, memLimit, memUsageResult)

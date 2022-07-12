@@ -1,6 +1,8 @@
 package run
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -50,4 +52,26 @@ func TestNoOutput(t *testing.T) {
 func TestNonZero(t *testing.T) {
 	_, _, err := Run(`bash -c 'false'`, 5*1024, 50*1024*1024, 100*time.Millisecond)
 	assert.EqualValues(t, NonZeroExitError, err)
+}
+
+func TestNonExistingPath(t *testing.T) {
+	_, _, err := Run(`./non_existing_file`,
+		5*1024, 50*1024*1024, 100*time.Millisecond)
+	assert.EqualValues(t, NotValidExecutableError, err)
+}
+
+func TestNonExecutable(t *testing.T) {
+	file, err := ioutil.TempFile("", "script*.sh")
+	assert.Nil(t, err)
+	defer os.Remove(file.Name())
+
+	content := `#!/usr/bin/env bash 
+echo "hello world"
+`
+	_, err = file.Write([]byte(content))
+	assert.Nil(t, err)
+
+	_, _, err = Run(file.Name(),
+		5*1024, 50*1024*1024, 100*time.Millisecond)
+	assert.EqualValues(t, NotValidExecutableError, err)
 }
