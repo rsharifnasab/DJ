@@ -123,6 +123,7 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	if err != nil {
 		switch err.(type) {
 		case *fs.PathError:
+			//println(err.Error())
 			return "", "", NotValidExecutableError
 
 		default:

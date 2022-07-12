@@ -75,3 +75,24 @@ echo "hello world"
 		5*1024, 50*1024*1024, 100*time.Millisecond)
 	assert.EqualValues(t, NotValidExecutableError, err)
 }
+
+func TestExecutable(t *testing.T) {
+	file, err := ioutil.TempFile("", "script*.sh")
+	assert.Nil(t, err)
+	defer os.Remove(file.Name())
+
+	content := `#!/usr/bin/env bash 
+echo "hello world"
+`
+	_, err = file.Write([]byte(content))
+	assert.Nil(t, err)
+
+	file.Chmod(0777)
+	err = file.Close()
+	assert.Nil(t, err)
+
+	stdout, _, err := Run(file.Name(),
+		5*1024, 50*1024*1024, 100*time.Millisecond)
+	assert.Nil(t, err)
+	assert.EqualValues(t, "hello world\n", stdout)
+}
