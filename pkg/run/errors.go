@@ -15,3 +15,5 @@ var (
 )
 
 // with the help of: https://www.domjudge.org/docs/manual/8.0/team.html
+
+//TODO: replace with proper error structs

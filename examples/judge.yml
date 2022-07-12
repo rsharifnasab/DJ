@@ -1,6 +1,0 @@
-time:
-  compile: 40 # max compile time
-  run: 30 # max run time 
-
-remote:
-  url: https://github.com/rsharifnasab/sample_remote_class.git

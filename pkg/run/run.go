@@ -2,6 +2,7 @@ package run
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"os/exec"
 	"syscall"
@@ -177,4 +178,17 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	}
 
 	return outStr, errStr, nil
+}
+
+func DefaultRun(command string) (string, string, error) {
+	stdout, stderr, err := Run(command, 10*1024*1024, 128*1024*1024, 10*time.Second)
+	return stdout, stderr, err
+}
+
+func JustOut(command string) (string, error) {
+	stdout, stderr, err := Run(command, 10*1024*1024, 128*1024*1024, 10*time.Second)
+	if len(stderr) > 0 {
+		fmt.Printf("WARNING STDERR: [%v]\n", stderr)
+	}
+	return stdout, err
 }
