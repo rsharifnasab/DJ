@@ -1,8 +1,11 @@
 package judge
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,4 +19,12 @@ func TestCheckReq(t *testing.T) {
 func TestNoOfTest(t *testing.T) {
 	n := numberOfTests(judger1Path)
 	assert.Equal(t, 5, n)
+}
+
+func TestJudge(t *testing.T) {
+	tempDir, err := ioutil.TempDir("", "dj_judge_*")
+	cobra.CheckErr(err)
+	defer os.RemoveAll(tempDir)
+
+	//judge(judger1Path, )
 }
