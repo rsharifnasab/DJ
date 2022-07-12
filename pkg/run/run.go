@@ -36,33 +36,35 @@ func totalMemoryUsage(p *process.Process) (uint64, error) {
 	return sum, nil
 }
 
-func monitorMem(p *process.Process, memLimit uint64, result chan uint64) {
+// Frequently monitor memory usage of given process.
+// if is it using memory more than expected? kill it and write somethin to result channel
+// using https://pkg.go.dev/github.com/shirou/gopsutil/process#MemoryInfoStat
+// the current solution should work on windows too
+func monitorMem(pid int, memLimit uint64, result chan uint64) {
 	// there is also linux only solution with setrlimit:
 	// read `man 2 prlimit`  and
 	// https://golang.hotexamples.com/examples/syscall/-/Setrlimit/golang-setrlimit-function-examples.html
 	// https://www.quora.com/Computer-Programming/What-is-the-simplest-and-most-accurate-way-to-measure-the-memory-used-by-a-program-in-a-programming-contest-environment/answer/Vivek-Prakash-2
-	// the current solution should be platform independant
 	// (why windows still exists?)
 
-	// using https://pkg.go.dev/github.com/shirou/gopsutil/process#MemoryInfoStat
+	process, err := process.NewProcess(int32(pid))
+	cobra.CheckErr(err)
 
 	for {
-		totalUsingMem, err := totalMemoryUsage(p)
+		totalUsingMem, err := totalMemoryUsage(process)
 		switch err.(type) {
-		case nil: // no error
+		case nil: // no error, break the switch case
 			break
 		case *fs.PathError, syscall.Errno:
 			// linux: process in proc not found
-			// windows, systemcall not found
+			// windows, systemcall error
 			return
 		default:
 			panic(err)
 		}
 
-		print("mem usage (KB) : ")
-		println(totalUsingMem / 1024)
 		if totalUsingMem > memLimit {
-			err := p.Kill()
+			err := process.Kill()
 			if err != nil {
 				panic(err)
 			}
@@ -74,35 +76,35 @@ func monitorMem(p *process.Process, memLimit uint64, result chan uint64) {
 	}
 }
 
-func Run(command string, outLimit int, memLimit uint64, timeout time.Duration) (string, error) {
-	// which language
-	// apply rules
-	// compile, print compile errors
-	// for: run on all test cases
-	//   with tests count and out limit and ...
-
+// run a command with given limits for outbut (bytes), memory limiy (bytes) and duration
+// duration is handling with golang's context so it's almost reliable
+// but output limit and memory limit are handmaiden cross platform solutions
+// known bugs: memory limit monitor routine sometimes experience starvation so it doen'st kill the program on-time
+func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration) (string, string, error) {
 	// sharif-judge use this:
 	// https://github.com/mjnaderi/Sharif-Judge/blob/Version-1/tester/runcode.sh
 
-	memUsage := make(chan uint64)
+	memUsageResult := make(chan uint64)
 
-	words, err := shellquote.Split(command)
+	commandWords, err := shellquote.Split(commandStr)
 	if err != nil {
-		return "", MalformedCommandError
+		return "", "", MalformedCommandError
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel() // cleanup resources eventually
 
 	// Create the command with our context
-	execCmd := exec.CommandContext(ctx, words[0], words[1:]...)
+	execCmd := exec.CommandContext(ctx, commandWords[0], commandWords[1:]...)
 
+	// initialize stdin, but we don't write anything by now
 	stdinWriter, err := execCmd.StdinPipe()
 	cobra.CheckErr(err)
 	_ = stdinWriter
 	//_, err = stdinWriter.Write(testInpData)
 	//cobra.CheckErr(err)
 
+	// initialize stdout and stderr before start
 	stdoutPipe, err := execCmd.StdoutPipe()
 	cobra.CheckErr(err)
 	outBuf := make([]byte, outLimit+1)
@@ -116,19 +118,18 @@ func Run(command string, outLimit int, memLimit uint64, timeout time.Duration) (
 	cobra.CheckErr(err)
 
 	pid := execCmd.Process.Pid
-	process, err := process.NewProcess(int32(pid))
-	cobra.CheckErr(err)
-	go monitorMem(process, memLimit, memUsage)
+	go monitorMem(pid, memLimit, memUsageResult)
 
+	// fill stdout buffer
 	bytesRead, err := stdoutPipe.Read(outBuf)
 	if bytesRead == outLimit+1 {
-		return "", OutputLimitError
+		return "", "", OutputLimitError
 	}
-	out := outBuf[:bytesRead]
 
 	err = stdoutPipe.Close()
 	cobra.CheckErr(err)
 
+	// fill stderr buffer
 	stderrN, err := stderrPipe.Read(errBuf)
 	_ = stderrN
 	err = stderrPipe.Close()
@@ -138,30 +139,28 @@ func Run(command string, outLimit int, memLimit uint64, timeout time.Duration) (
 	// and check for any error
 	executeErr := execCmd.Wait()
 
-	//println("stderr:")
-	//println(string(errBuf[:stderrN]))
-
 	if ctx.Err() == context.DeadlineExceeded {
-		return "", TimedOutError
+		return "", "", TimedOutError
 	} else if ctx.Err() != nil {
 		panic(err)
 	}
 
 	select {
-	case <-memUsage:
-		return "", MemoryLimitError
+	case <-memUsageResult:
+		return "", "", MemoryLimitError
 	default:
 
 	}
 
 	if executeErr != nil {
-		return "", NonZeroExitError
+		return "", "", NonZeroExitError
 	}
 
-	outStr := string(out)
+	outStr := string(outBuf[:bytesRead])
+	errStr := string(errBuf[:stderrN])
 	if bytesRead == 0 {
-		return outStr, NoOutputError
+		return outStr, errStr, NoOutputError
 	}
 
-	return outStr, nil
+	return outStr, errStr, nil
 }
