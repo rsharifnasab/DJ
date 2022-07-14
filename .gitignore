@@ -1,6 +1,5 @@
+/out
 /main
-*.out
-*.class
 
 # Created by https://www.gitignore.io/api/go
 # Edit at https://www.gitignore.io/?templates=go
@@ -12,6 +11,8 @@
 *.dll
 *.so
 *.dylib
+*.out
+*.class
 
 # Test binary, built with `go test -c`
 *.test
@@ -26,4 +27,3 @@ vendor/
 # End of https://www.gitignore.io/api/go
 
 tags
-junit
