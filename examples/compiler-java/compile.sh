@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-set -o nounset
-set -o pipefail
+set -euo pipefail
 
 rm -rf out
 mkdir -p out
