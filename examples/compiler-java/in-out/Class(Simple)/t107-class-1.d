@@ -1,0 +1,12 @@
+
+class Test {
+    int f;
+
+    void test() {
+
+    }
+}
+
+int main() {
+    Test t;
+}

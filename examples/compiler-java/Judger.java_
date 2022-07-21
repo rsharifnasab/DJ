@@ -1,0 +1,58 @@
+import org.junit.runner.*;
+import org.junit.runner.notification.RunNotifier;
+import org.runner.manipulation.*;
+
+import javax.management.Descriptor;
+
+import org.junit.Test;
+
+public class Judger {
+
+    public static void testCount() {
+        System.out.println(5);
+    }
+
+    public static  void runTest(int testNumber) {
+        System.out.println("pass");
+    }
+
+    public static void main(String[] args) throws Exception{
+        Class<?> clazz = Class.forName("MyTest"); // or MyTest.class
+        JUnitCore runner = new JUnitCore();
+        //Adding listener here
+        //runner.addListener(new ExecutionListener());
+
+
+        Description desc = Description.createSuiteDescription(clazz);
+        System.out.println("description : " + desc);
+        System.out.println("test count : " + desc.testCount());
+        System.out.println("test child : " + desc.getChildren());
+        System.out.println("test child : " + desc.getAnnotations());
+
+        Filter f = new Filter(){
+            public abstract boolean shouldRun(Description description){
+                return true;
+            }
+        };
+
+        //Request request = 
+
+        Result result = runner.run(clazz);
+        System.out.println(" result : " + result);
+
+
+        switch(args[0]) {
+            case "count":
+                testCount();
+                break;
+
+            case "test":
+                runTest(Integer.parseInt(args[1]));
+                break;
+
+            default:
+                return;
+        }
+    }
+
+}
