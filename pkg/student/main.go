@@ -1,5 +1,16 @@
 package student
 
+import (
+	"github.com/rsharifnasab/DJ/pkg/run"
+	"github.com/rsharifnasab/DJ/pkg/util"
+)
+
+func Run(submission run.Submission) {
+	util.PrintStruct(submission)
+	util.PrintStruct(submission.Run())
+	//TODO: print student details and final score
+}
+
 /*
 func Run() {
 

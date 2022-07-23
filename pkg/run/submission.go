@@ -2,15 +2,14 @@ package run
 
 type Submission struct {
 	Path     string
-	Runner   string
+	Judger   string
 	Question string
 }
 
 func NewSubmission(path, runner, question string) *Submission {
-
 	submission := &Submission{
 		Path:     path,
-		Runner:   runner,
+		Judger:   runner,
 		Question: question,
 	}
 	return submission

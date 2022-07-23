@@ -6,9 +6,9 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/rsharifnasab/DJ/pkg/run"
+	"github.com/rsharifnasab/DJ/pkg/student"
 	"github.com/spf13/cobra"
 )
 
@@ -25,10 +25,8 @@ and usage of using your command. For example:
 
 students can run and test thier codes via this command`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Fprintf(os.Stdout, "---\n%+v\n----\n", submission)
-
-		fmt.Println("student called")
-
+		fmt.Println("student cmd")
+		student.Run(submission)
 	},
 }
 
@@ -46,8 +44,13 @@ func init() {
 	cobra.CheckErr(err)
 
 	studentCmd.PersistentFlags().StringVarP(
-		&submission.Runner, "judger", "j",
+		&submission.Judger, "judger", "j",
 		"", "The judger suitable for your submission")
 	err = studentCmd.MarkPersistentFlagRequired("judger")
 	cobra.CheckErr(err)
+
+	studentCmd.PersistentFlags().StringVarP(
+		&submission.Question, "question", "q",
+		"", "the question you are answering to")
+
 }

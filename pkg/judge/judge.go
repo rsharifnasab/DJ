@@ -114,11 +114,16 @@ func compile(judgerPath string) {
 	println("compiler warnings: " + stdout)
 }
 
-func judge(judgerPath string, submissionPath string) (int, int) {
+func judge(submission run.Submission) (int, int) {
 	tmpFolder := makeTempfolder()
 	defer os.RemoveAll(tmpFolder)
 
-	copyDir(judgerPath+"/lib", tmpFolder)
+	judgerPath := submission.Judger
+	submissionPath := submission.Path
+	questionPath := submission.Question
+	_ = questionPath
+
+	copyDir(judgerPath+"/lib", tmpFolder+"/lib")
 	copyDir(judgerPath+"/project", tmpFolder)
 	copyDir(submissionPath, tmpFolder)
 	copyDir(judgerPath+"/test", tmpFolder)
