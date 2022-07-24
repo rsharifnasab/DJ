@@ -2809,7 +2809,7 @@ class Compiler {
     public static void writeToFile( String outputFileName ) throws IOException {
         //        System.out.println(outputFileName);
 //        System.out.println(finalCode.getText());
-        FileWriter out = new FileWriter( "out/" +  outputFileName );
+        FileWriter out = new FileWriter( outputFileName );
         out.write( finalCode.getText());
         out.close();
     }
@@ -2819,7 +2819,7 @@ class Compiler {
         Compiler.outputFileName = outputFileName;
         Reader reader;
         if (inputFileName != null)
-            reader = new FileReader("Tests/" + inputFileName);
+            reader = new FileReader(inputFileName);
         else
             reader = new FileReader("tests/t01.in");
         parser p = new parser(new MyScanner(reader));
