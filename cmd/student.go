@@ -7,13 +7,13 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/rsharifnasab/DJ/pkg/run"
+	"github.com/rsharifnasab/DJ/pkg/judge"
 	"github.com/rsharifnasab/DJ/pkg/student"
 	"github.com/spf13/cobra"
 )
 
 var (
-	submission run.Submission
+	submission judge.Submission
 )
 
 // studentCmd represents the student command
@@ -26,7 +26,7 @@ and usage of using your command. For example:
 students can run and test thier codes via this command`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("student cmd")
-		student.Run(submission)
+		student.Run(&submission)
 	},
 }
 
@@ -36,11 +36,11 @@ func init() {
 
 	// Persistent Flags which will work for this command and all subcommands
 	studentCmd.PersistentFlags().StringVarP(
-		&submission.Path, "submission", "s",
-		"", "Root of submission directory")
-	err = studentCmd.MarkPersistentFlagRequired("submission")
+		&submission.Solution, "solution", "s",
+		"", "Root of your solution directory")
+	err = studentCmd.MarkPersistentFlagRequired("solution")
 	cobra.CheckErr(err)
-	err = studentCmd.MarkPersistentFlagDirname("submission")
+	err = studentCmd.MarkPersistentFlagDirname("solution")
 	cobra.CheckErr(err)
 
 	studentCmd.PersistentFlags().StringVarP(
@@ -51,6 +51,8 @@ func init() {
 
 	studentCmd.PersistentFlags().StringVarP(
 		&submission.Question, "question", "q",
-		"", "the question you are answering to")
+		"", "the question path that you are answering to")
+	err = studentCmd.MarkPersistentFlagRequired("question")
+	cobra.CheckErr(err)
 
 }

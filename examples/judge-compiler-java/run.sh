@@ -82,6 +82,8 @@ run_test() {
     src_file=$(find_file "$TEST_NUMBER" "d")
     test_name="$TEST_NUMBER"
 
+    echo "running test $test_name" 2>&1
+
     run_log="$(run_code "$src_file" "$compiled_file")"
     echerr "$run_log" >&2
 
@@ -100,12 +102,17 @@ clean() {
     rm "actual.txt"
 }
 
-if [[ "compile" == "$COMMAND" ]]; then
-    ./compile.sh
-elif [[ "count" == "$COMMAND" ]]; then
-    test_count
-elif [[ "test" == "$COMMAND" ]]; then
-    run_test "$TEST_NUMBER"
-elif [[ "clean" == "$COMMAND" ]]; then
-    clean
-fi
+main(){
+    cd -P -- "$(dirname -- "$0")"
+    if [[ "compile" == "$COMMAND" ]]; then
+        ./compile.sh
+    elif [[ "count" == "$COMMAND" ]]; then
+        test_count
+    elif [[ "test" == "$COMMAND" ]]; then
+        run_test "$TEST_NUMBER"
+    elif [[ "clean" == "$COMMAND" ]]; then
+        clean
+    fi
+}
+
+main

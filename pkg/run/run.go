@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os/exec"
+	"strings"
 	"syscall"
 	"time"
 
@@ -88,6 +89,8 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 
 	memUsageResult := make(chan uint64)
 
+	println(commandStr)
+
 	commandWords, err := shellquote.Split(commandStr)
 	if err != nil {
 		return "", "", MalformedCommandError
@@ -168,12 +171,14 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 
 	}
 
-	if executeErr != nil {
-		return "", "", NonZeroExitError
-	}
-
 	outStr := string(outBuf[:bytesRead])
 	errStr := string(errBuf[:stderrN])
+
+	if executeErr != nil {
+		println(executeErr.Error())
+		return outStr, errStr, NonZeroExitError
+	}
+
 	if bytesRead == 0 {
 		return outStr, errStr, NoOutputError
 	}
@@ -182,14 +187,28 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 }
 
 func DefaultRun(command string) (string, string, error) {
-	stdout, stderr, err := Run(command, 10*1024*1024, 128*1024*1024, 10*time.Second)
+	stdout, stderr, err := Run(command, 10*1024*1024, 1024*1024*1024, 20*time.Second)
 	return stdout, stderr, err
 }
 
 func JustOut(command string) (string, error) {
-	stdout, stderr, err := Run(command, 10*1024*1024, 128*1024*1024, 10*time.Second)
+	stdout, stderr, err := DefaultRun(command)
 	if len(stderr) > 0 {
-		fmt.Printf("WARNING STDERR: [%v]\n", stderr)
+		stderr = strings.TrimSpace(stderr)
+		fmt.Printf("STDERR: [%v]\n", stderr)
 	}
 	return stdout, err
+}
+
+func JustRun(command string) error {
+	stdout, stderr, err := DefaultRun(command)
+	if len(stderr) > 0 {
+		stderr = strings.TrimSpace(stderr)
+		fmt.Printf("STDERR: [%v]\n", stderr)
+	}
+	if len(stdout) > 0 {
+		stdout = strings.TrimSpace(stdout)
+		fmt.Printf("STDOUT: [%v]\n", stdout)
+	}
+	return err
 }

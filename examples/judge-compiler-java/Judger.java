@@ -19,7 +19,7 @@ public class Judger {
     }
 
     static String getTestsFolder(){
-        return "util-files";
+        return "testgroup";
     }
 
     public static List<File> allTestsFiles(String suffix) throws Exception {

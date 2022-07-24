@@ -1,3 +1,0 @@
-int main(){
-    Print(ReadLine());
-}

@@ -1,13 +1,12 @@
 package student
 
 import (
-	"github.com/rsharifnasab/DJ/pkg/run"
+	"github.com/rsharifnasab/DJ/pkg/judge"
 	"github.com/rsharifnasab/DJ/pkg/util"
 )
 
-func Run(submission run.Submission) {
-	util.PrintStruct(submission)
-	util.PrintStruct(submission.Run())
+func Run(submission *judge.Submission) {
+	util.PrintStruct(judge.RunSubmission(submission))
 	//TODO: print student details and final score
 }
 
