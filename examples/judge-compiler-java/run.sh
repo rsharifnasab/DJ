@@ -9,8 +9,8 @@ echerr() {
 }
 
 test_count() {
-    #find "in-out" -name "*.out" | wc -l
-    java -cp "./out:./lib/*" Judger "count"
+    find "testgroup" -name "*.out" | wc -l
+    #java -cp "./out:./lib/*" Judger "count"
 }
 
 compare() {
@@ -18,9 +18,9 @@ compare() {
     local EXPECTED_FILE="$2"
     local actual
     local expected
-    actual=$(xargs <"$ACTUAL_FILE" |
+    actual=$(xargs <"$ACTUAL_FILE" | tr '\n' ' ' |
         awk '{gsub(/^ +| +$/,"")} { print $0 }')
-    expected=$(xargs <"$EXPECTED_FILE" |
+    expected=$(xargs <"$EXPECTED_FILE" | tr '\n' ' ' |
         awk '{gsub(/^ +| +$/,"")} { print $0 }')
     if [[ "$actual" == "$expected" ]]; then
         printf "%s" "pass"
@@ -39,7 +39,7 @@ find_file() {
     local NUMBER="$1"
     local POSTFIX="$2"
     local list
-    list="$(find "util-files" -name "*.$POSTFIX" | sort)"
+    list="$(find "testgroup" -name "*.$POSTFIX" | sort)"
     lines="$(wc -l <<<"$list")"
     if [[ lines -lt NUMBER ]]; then
         echerr "invalid test number [$NUMBER]"
@@ -82,7 +82,7 @@ run_test() {
     src_file=$(find_file "$TEST_NUMBER" "d")
     test_name="$TEST_NUMBER"
 
-    echo "running test $test_name" 2>&1
+    #echerr "running test $test_name"
 
     run_log="$(run_code "$src_file" "$compiled_file")"
     echerr "$run_log" >&2
@@ -90,8 +90,10 @@ run_test() {
     if grep -qi "semantic error" "$compiled_file"; then
         cp "$compiled_file" "$actual_out"
     else
-        run_interpreter "$compiled_file" "$inp_file" "$actual_out"
+        true
+        # TODO
     fi
+    run_interpreter "$compiled_file" "$inp_file" "$actual_out"
 
     result="$(compare "$actual_out" "$expected_file")"
     printf "test[%s] - %s\n" "$test_name" "$result"
@@ -102,7 +104,7 @@ clean() {
     rm "actual.txt"
 }
 
-main(){
+main() {
     cd -P -- "$(dirname -- "$0")"
     if [[ "compile" == "$COMMAND" ]]; then
         ./compile.sh

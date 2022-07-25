@@ -21,36 +21,42 @@ func checkReq(submission *Submission) {
 	run.CheckAndErrorRequirements(reqWords)
 }
 
-func runTestCase(submission Submission, i int) (result TestResult) {
+func runTestCase(submission *Submission, i int) (result *TestResult) {
 
 	command := fmt.Sprintf("%s/run.sh test %d", submission.sandboxDir, i)
 	stdout, err := run.JustOut(command)
-	result.Run = true
-	switch err {
-	case run.MemoryLimitError:
-		result.Killed = true
-		return
-	case run.OutputLimitError:
-		result.Killed = true
-		return
-	case run.MalformedCommandError:
-		panic(err)
-	case run.TimedOutError:
-		result.TimedOut = true
-		return
-	case run.NoOutputError:
-		result.NoResult = true
-		return
-	case run.NotValidExecutableError:
-		panic("cannot run test " + strconv.Itoa(i))
-	case run.NonZeroExitError:
-		result.NonZero = true
-		return
+	result = &TestResult{
+		Run: true,
+	}
+	if err != nil {
+		switch err {
+		case run.MemoryLimitError:
+			result.Killed = true
+			return
+		case run.OutputLimitError:
+			result.Killed = true
+			return
+		case run.MalformedCommandError:
+			panic(err)
+		case run.TimedOutError:
+			result.TimedOut = true
+			return
+		case run.NoOutputError:
+			result.NoResult = true
+			return
+		case run.NotValidExecutableError:
+			panic("cannot run test " + strconv.Itoa(i))
+		case run.NonZeroExitError:
+			result.NonZero = true
+			return
+		}
+	} else {
+		//println("no error")
 	}
 	//TODO: better handling
 	var n int
 	var resultStr string
-	_, err = fmt.Sscanf(stdout, "[%d] %s\n", &n, &resultStr)
+	_, err = fmt.Sscanf(stdout, "test[%d] - %s\n", &n, &resultStr)
 	if err != nil {
 		result.MalformedOutput = true
 		return
@@ -61,6 +67,7 @@ func runTestCase(submission Submission, i int) (result TestResult) {
 		result.Pass = true
 		return
 	case "fail":
+		result.Wrong = true
 		return
 	default:
 		result.MalformedOutput = true
@@ -69,11 +76,6 @@ func runTestCase(submission Submission, i int) (result TestResult) {
 }
 
 func testCount(submission *Submission) int {
-	err := run.JustRun("ls " + submission.sandboxDir)
-	if err != nil {
-		println("ls not completed " + err.Error())
-	}
-
 	command := fmt.Sprintf("%s/run.sh count", submission.sandboxDir)
 	stdout, err := run.JustOut(command)
 	cobra.CheckErr(err)
@@ -105,7 +107,7 @@ func restoreCompiled(submission *Submission) {
 	err := os.RemoveAll(submission.sandboxDir)
 	cobra.CheckErr(err)
 	util.CopyDir(submission.CompiledState, submission.sandboxDir)
-	println("copy done")
+	//println("copy done")
 }
 
 func exploreTestGroups(submission *Submission) []*TestGroupResult {
@@ -115,7 +117,8 @@ func exploreTestGroups(submission *Submission) []*TestGroupResult {
 	cobra.CheckErr(err)
 	for _, f := range files {
 		testGroup := &TestGroupResult{
-			Name: f.Name(), // just name
+			Name:        f.Name(), // just name
+			TestResults: make([]*TestResult, 0, 10),
 		}
 		res = append(res, testGroup)
 	}
@@ -149,12 +152,21 @@ func RunSubmission(submission *Submission) *SubmissionResult {
 	}
 
 	for _, groupResult := range submResult.TestGroupResults {
-		println("testgroup " + groupResult.Name)
+		//println(" - - - - - - - testgroup: " + groupResult.Name + " - - - - - - - - -")
 		restoreCompiled(submission)
-		println("restore compile success")
+		//println("restore compile success")
 		prepareTestGroup(submission, groupResult.Name)
-		println("prepare test group success")
+		//println("prepare test group success")
 		groupResult.TestCount = testCount(submission)
+		for i := 1; i <= groupResult.TestCount; i++ {
+			//println(" - - - testgroup[" + groupResult.Name + "] test" + strconv.Itoa(i) + " - - -")
+			testResult := runTestCase(submission, i)
+			//util.PrintStruct(testResult)
+			groupResult.TestResults = append(groupResult.TestResults, testResult)
+		}
+		println(groupResult.String())
+		//time.Sleep(5 * time.Second)
+
 	}
 
 	return submResult

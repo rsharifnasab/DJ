@@ -2,11 +2,10 @@ package student
 
 import (
 	"github.com/rsharifnasab/DJ/pkg/judge"
-	"github.com/rsharifnasab/DJ/pkg/util"
 )
 
 func Run(submission *judge.Submission) {
-	util.PrintStruct(judge.RunSubmission(submission))
+	_ = judge.RunSubmission(submission)
 	//TODO: print student details and final score
 }
 

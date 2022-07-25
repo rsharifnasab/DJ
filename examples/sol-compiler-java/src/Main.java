@@ -2827,52 +2827,52 @@ class Compiler {
         this.setRoot(parser.root);
 
         // detect semantic errors
-        System.out.println("0.ok");
+        //System.out.println("0.ok");
 
         preProcess(root); // assign indices to parse tree
-        System.out.println("1.ok");
+        //System.out.println("1.ok");
 
         Type.createTypes(); // create all types and construct tree of types
-        System.out.println("2.ok");
+        //System.out.println("2.ok");
 
         createArrays(root); // create arrays and add them to types & set type of each Type node
-        System.out.println("3.ok");
+        //System.out.println("3.ok");
 
 //        createBuiltinFunctions(root); // btoi, itob, dtoi, itod
-        System.out.println("4.ok");
+        //System.out.println("4.ok");
 
         areAllVariablesUnique(root); // are there variables with the same name in a scope?
-        System.out.println("5.ok");
+        //System.out.println("5.ok");
 
         areAllFunctionsUnique(root); // are there functions with the same name in a class?
-        System.out.println("6.ok");
+        //System.out.println("6.ok");
 
         setVariableType(root); // set the proper type for each variable
-        System.out.println("7.ok");
+        //System.out.println("7.ok");
 
         setFunctionType(root); // set the proper type for each function
-        System.out.println("8.ok");
+        //System.out.println("8.ok");
 
         setClazzType(); // set the proper type for each class
-        System.out.println("9.ok");
+        //System.out.println("9.ok");
 
         setAllClazzAttributesAndFunctions();
-        System.out.println("10.ok");
+        //System.out.println("10.ok");
 
         setAllNodesType(root); // set the proper type for Constant, Call, Lvalue and Expr
-        System.out.println("11.ok");
+        //System.out.println("11.ok");
 
         checkIntegerIndices(root); // check type of indices and count in NewArray
-        System.out.println("12.ok");
+        //System.out.println("12.ok");
 
         checkFunctionCalls(root);
-        System.out.println("13.ok");
+        //System.out.println("13.ok");
         // produce the final code
         checkReturnTypes(root);
-        System.out.println("14.ok");
+        //System.out.println("14.ok");
 
         setFunctionLabels(root);
-        System.out.println("15.ok");
+        //System.out.println("15.ok");
 
         codeGenerator.generateCode(root);
         //todo
