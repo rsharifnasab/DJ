@@ -1,11 +1,14 @@
 package student
 
 import (
+	"fmt"
+
 	"github.com/rsharifnasab/DJ/pkg/judge"
 )
 
 func Run(submission *judge.Submission) {
-	_ = judge.RunSubmission(submission)
+	submResult := judge.RunSubmission(submission)
+	fmt.Printf("%s\n", submResult.String())
 	//TODO: print student details and final score
 }
 

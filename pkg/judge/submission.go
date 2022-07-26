@@ -101,3 +101,14 @@ type SubmissionResult struct {
 	Submission       *Submission
 	TestGroupResults []*TestGroupResult
 }
+
+func (sr *SubmissionResult) String() string {
+	builder := strings.Builder{}
+	builder.WriteString("Submission Result: [\n")
+	for _, gr := range sr.TestGroupResults {
+		str := fmt.Sprintf("    testgroup %s: (%d/%d) - %d%%\n", gr.Name, gr.PassedCount(), gr.AllCount(), gr.Score())
+		builder.WriteString(str)
+	}
+	builder.WriteString("]")
+	return builder.String()
+}
