@@ -23,9 +23,10 @@ compare() {
     expected=$(xargs <"$EXPECTED_FILE" | tr '\n' ' ' |
         awk '{gsub(/^ +| +$/,"")} { print $0 }')
     if [[ "$actual" == "$expected" ]]; then
-        printf "%s" "pass"
+        printf "pass"
     else
-        printf "%s" "fail"
+        printf "fail"
+        echerr ""
         echerr "----------actual:---------"
         echerr "$actual"
         echerr "---------expected:--------"
@@ -90,10 +91,10 @@ run_test() {
     if grep -qi "semantic error" "$compiled_file"; then
         cp "$compiled_file" "$actual_out"
     else
+        run_interpreter "$compiled_file" "$inp_file" "$actual_out"
         true
         # TODO
     fi
-    run_interpreter "$compiled_file" "$inp_file" "$actual_out"
 
     result="$(compare "$actual_out" "$expected_file")"
     printf "test[%s] - %s\n" "$test_name" "$result"

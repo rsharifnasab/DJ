@@ -31,9 +31,9 @@ func Run() {
 		submission := run.NewSubmission("./examples/solution.cpp")
 
 		util.PrintStruct(submission)
-		//println(submission.SourceContent)
+		//fmt.Println(submission.SourceContent)
 		util.PrintStruct(question.AvailableLangs[submission.LanguageName])
-		println("\n----------\n")
+		fmt.Println("\n----------\n")
 
 		runExampleTests()
 

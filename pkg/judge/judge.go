@@ -51,7 +51,7 @@ func runTestCase(submission *Submission, i int) (result *TestResult) {
 			return
 		}
 	} else {
-		//println("no error")
+		//fmt.Println("no error")
 	}
 	//TODO: better handling
 	var n int
@@ -85,7 +85,7 @@ func testCount(submission *Submission) int {
 }
 
 func compile(submission *Submission) {
-	println("sandbox dir : " + submission.sandboxDir)
+	fmt.Println("sandbox dir : " + submission.sandboxDir)
 	command := fmt.Sprintf("%s/run.sh compile", submission.sandboxDir)
 
 	err := run.JustRun(command)
@@ -107,7 +107,7 @@ func restoreCompiled(submission *Submission) {
 	err := os.RemoveAll(submission.sandboxDir)
 	cobra.CheckErr(err)
 	util.CopyDir(submission.CompiledState, submission.sandboxDir)
-	//println("copy done")
+	//fmt.Println("copy done")
 }
 
 func exploreTestGroups(submission *Submission) []*TestGroupResult {
@@ -143,7 +143,7 @@ func RunSubmission(submission *Submission) *SubmissionResult {
 	checkReq(submission)
 
 	compile(submission)
-	println("compile successful")
+	fmt.Println("compile successful")
 	backupCompiled(submission)
 
 	submResult := &SubmissionResult{
@@ -152,19 +152,19 @@ func RunSubmission(submission *Submission) *SubmissionResult {
 	}
 
 	for _, groupResult := range submResult.TestGroupResults {
-		//println(" - - - - - - - testgroup: " + groupResult.Name + " - - - - - - - - -")
+		//fmt.Println(" - - - - - - - testgroup: " + groupResult.Name + " - - - - - - - - -")
 		restoreCompiled(submission)
-		//println("restore compile success")
+		//fmt.Println("restore compile success")
 		prepareTestGroup(submission, groupResult.Name)
-		//println("prepare test group success")
+		//fmt.Println("prepare test group success")
 		groupResult.TestCount = testCount(submission)
 		for i := 1; i <= groupResult.TestCount; i++ {
-			//println(" - - - testgroup[" + groupResult.Name + "] test" + strconv.Itoa(i) + " - - -")
+			//fmt.Println(" - - - testgroup[" + groupResult.Name + "] test" + strconv.Itoa(i) + " - - -")
 			testResult := runTestCase(submission, i)
 			//util.PrintStruct(testResult)
 			groupResult.TestResults = append(groupResult.TestResults, testResult)
 		}
-		println(groupResult.String())
+		fmt.Println(groupResult.String())
 		//time.Sleep(5 * time.Second)
 
 	}

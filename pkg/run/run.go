@@ -89,7 +89,7 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 
 	memUsageResult := make(chan uint64)
 
-	println(commandStr)
+	fmt.Println(commandStr)
 
 	commandWords, err := shellquote.Split(commandStr)
 	if err != nil {
@@ -106,7 +106,7 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	stdinWriter, err := execCmd.StdinPipe()
 	if err != nil {
 		print("err : ")
-		println(err.Error())
+		fmt.Println(err.Error())
 		//cobra.CheckErr(err)
 		panic(err)
 	}
@@ -128,7 +128,7 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	if err != nil {
 		switch err.(type) {
 		case *fs.PathError:
-			//println(err.Error())
+			//fmt.Println(err.Error())
 			return "", "", NotValidExecutableError
 
 		default:
@@ -175,7 +175,7 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	errStr := string(errBuf[:stderrN])
 
 	if executeErr != nil {
-		println(executeErr.Error())
+		fmt.Println(executeErr.Error()) // TODO: handle in a better way
 		return outStr, errStr, NonZeroExitError
 	}
 
