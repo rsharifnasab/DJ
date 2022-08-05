@@ -3,6 +3,8 @@ package run
 import (
 	"fmt"
 	"os/exec"
+
+	"github.com/spf13/cobra"
 )
 
 // check if specified program is installed on path or not
@@ -26,7 +28,7 @@ func WhichNotInstalled(names []string) string {
 func CheckAndErrorRequirements(names []string) {
 	notInstalled := WhichNotInstalled(names)
 	if notInstalled != "" {
-		panic(fmt.Sprintf("program [%v] is not installed on your path\n", notInstalled))
+		cobra.CheckErr(fmt.Sprintf("program [%v] is not installed on your path\n", notInstalled))
 
 	}
 }
