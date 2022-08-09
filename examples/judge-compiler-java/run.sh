@@ -88,12 +88,10 @@ run_test() {
     run_log="$(run_code "$src_file" "$compiled_file")"
     echerr "$run_log" >&2
 
-    if grep -qi "semantic error" "$compiled_file"; then
+    if grep -qi "semantic error" "$expected_file"; then
         cp "$compiled_file" "$actual_out"
     else
         run_interpreter "$compiled_file" "$inp_file" "$actual_out"
-        true
-        # TODO
     fi
 
     result="$(compare "$actual_out" "$expected_file")"

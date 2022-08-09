@@ -1,92 +1,120 @@
 #!/bin/bash
-subtasks=( "G1" "G2" "G3" )
-scores=( 10 20 30 )
-mkdir -p out
-mkdir -p report
-cd ./tests
-prefix="" ;
-score=0;
-dirlist=(`ls`) ;
-OUTPUT_DIRECTORY="out/"
-TEST_DIRECTORY="tests/"
-REPORT_DIRECTORY="report/"
+set -euo pipefail
 
-cd ../
-for folder in ${dirlist[*]}
-do
-	NUMBER_OF_PASSED=0
-	NUMBER_OF_FAILED=0
-	echo "Subtask $folder -------------------------------------"
-	cd ./out
-	mkdir -p $folder
-	cd ../report
-	mkdir -p $folder
-	cd ..
-	cd ./tests
-	cd $folder	
-	testlist=(`ls ${prefix}*.d`);
-	cd ../../
-	for filelist in ${testlist[*]}
-	do
-		filename=`echo $filelist | cut -d'.' -f1`;
-		output_filename="$filename.out"
-		output_asm="$filename.s"
-		program_input="$filename.in"
-		report_filename="$filename.report.txt"
-		echo "Running Test $filename -------------------------------------"
-		if command -v python3; then
-			
-			python3 main.py -i "$TEST_DIRECTORY/$folder/$filelist" -o "$OUTPUT_DIRECTORY/$folder/$output_asm"
-		else
-			python main.py -i "$TEST_DIRECTORY/$folder/$filelist" -o "$OUTPUT_DIRECTORY/$folder/$output_asm"
-		fi
-		if [ $? -eq 0 ]; then
-			echo "MIPS Generated Successfuly!"
-		spim -a -f "$OUTPUT_DIRECTORY$folder/$output_asm" < "$TEST_DIRECTORY$folder/$program_input" > "$OUTPUT_DIRECTORY$folder/$output_filename"
-		if [ $? -eq 0 ]; then
-			echo "Code Executed Successfuly!"
-			if command -v python3; then
-				python3 comp.py -a "$OUTPUT_DIRECTORY$folder/$output_filename" -b "$TEST_DIRECTORY$folder/$output_filename" -o "$REPORT_DIRECTORY$folder/$report_filename"
-			else
-				python comp.py -a "$OUTPUT_DIRECTORY$folder/$output_filename" -b "$TEST_DIRECTORY$folder/$output_filename" -o "$REPORT_DIRECTORY$folder/$report_filename"
-			fi
-			if [[ $? = 0 ]]; then
-				((NUMBER_OF_PASSED++))
-				echo "++++ test passed"
-			else
-				((NUMBER_OF_FAILED++))
-				echo "---- test failed !"
-			echo
-			fi
-			fi 
-		else
-			echo "Code did not execute successfuly!"
-			((NUMBER_OF_FAILED++))
-		fi
-		
-	done
-	
-	echo "Passed : $NUMBER_OF_PASSED"
-	echo "Failed : $NUMBER_OF_FAILED"
-	
-	echo "Subtask score: "
-	len=${#subtasks[@]}
-	for (( i=0; i<$len; i++ ))
-	do
-		if [[ "${subtasks[$i]}" == "$folder" ]]; then
-			subtask_score=$(( $NUMBER_OF_PASSED/($NUMBER_OF_PASSED + $NUMBER_OF_FAILED) * ${scores[$i]} ));
-			echo $subtask_score;
-			(( score+= $NUMBER_OF_PASSED/($NUMBER_OF_PASSED + $NUMBER_OF_FAILED) * ${scores[$i]} ));
-		fi
-	done
-	
-	
-	echo "Subtask $folder done ------------------------------"
-	echo $'\n\n'
-	
-	
-done
+readonly COMMAND="$1" #"count" or "test"
+readonly TEST_NUMBER="${2:-0}"
 
-echo "Final score: "
-echo "$score"
+echerr() {
+    echo "$@" 1>&2
+}
 
+test_count() {
+    find "testgroup" -name "*.out" | wc -l
+    #java -cp "./out:./lib/*" Judger "count"
+}
+
+compare() {
+    local ACTUAL_FILE="$1"
+    local EXPECTED_FILE="$2"
+    local actual
+    local expected
+    actual=$(xargs <"$ACTUAL_FILE" | tr '\n' ' ' |
+        awk '{gsub(/^ +| +$/,"")} { print $0 }')
+    expected=$(xargs <"$EXPECTED_FILE" | tr '\n' ' ' |
+        awk '{gsub(/^ +| +$/,"")} { print $0 }')
+    if [[ "$actual" == "$expected" ]]; then
+        printf "pass"
+    else
+        printf "fail"
+        echerr ""
+        echerr "----------actual:---------"
+        echerr "$actual"
+        echerr "---------expected:--------"
+        echerr "$expected"
+        echerr "--------------------------"
+    fi
+    #python3 compare.py -e "$expected_file" -a "actual.txt"
+}
+
+find_file() {
+    local NUMBER="$1"
+    local POSTFIX="$2"
+    local list
+    list="$(find "testgroup" -name "*.$POSTFIX" | sort)"
+    lines="$(wc -l <<<"$list")"
+    if [[ lines -lt NUMBER ]]; then
+        echerr "invalid test number [$NUMBER]"
+        exit 1
+    fi
+    echo "$list" | head -n "$NUMBER" | tail -1
+}
+
+run_interpreter() {
+    local asm_file="$1"
+    local inp_file="$2"
+    local out_file="$3"
+
+    spim -a -f "$asm_file" <"$inp_file" >"$out_file" 1>&2
+
+    # more info here: http://courses.missouristate.edu/KenVollmar/MARS/Help/MarsHelpCommand.html
+    #java -jar ./lib/mars.jar "nc" "ic" "me" "se1" "ae2" "100000" \
+    #    "$compiled_file" > "$actual_out" 2> mars_log.txt || true
+}
+
+run_code() {
+    local src_file="$1"
+    local compiled_file="$2"
+    #java -cp "out:lib/*" Main -i "$src_file" -o "$compiled_file"
+    python3 src/main.py -i "$src_file" -o "$compiled_file"
+}
+
+run_test() {
+    local expected_file
+    local inp_file
+    local src_file
+
+    local compiled_file="compiled.asm"
+    local actual_out="actual.txt"
+
+    rm -f "$compiled_file"
+    rm -f "$actual_out"
+
+    expected_file=$(find_file "$TEST_NUMBER" "out")
+    inp_file=$(find_file "$TEST_NUMBER" "in")
+    src_file=$(find_file "$TEST_NUMBER" "d")
+    test_name="$TEST_NUMBER"
+
+    #echerr "running test $test_name"
+
+    run_log="$(run_code "$src_file" "$compiled_file")"
+    echerr "$run_log" >&2
+
+    if grep -qi "semantic error" "$expected_file"; then
+        cp "$compiled_file" "$actual_out"
+    else
+        run_interpreter "$compiled_file" "$inp_file" "$actual_out"
+    fi
+
+    result="$(compare "$actual_out" "$expected_file")"
+    printf "test[%s] - %s\n" "$test_name" "$result"
+}
+
+clean() {
+    rm "compiled.asm"
+    rm "actual.txt"
+}
+
+main() {
+    cd -P -- "$(dirname -- "$0")"
+    if [[ "compile" == "$COMMAND" ]]; then
+        ./compile.sh
+    elif [[ "count" == "$COMMAND" ]]; then
+        test_count
+    elif [[ "test" == "$COMMAND" ]]; then
+        run_test "$TEST_NUMBER"
+    elif [[ "clean" == "$COMMAND" ]]; then
+        clean
+    fi
+}
+
+main
