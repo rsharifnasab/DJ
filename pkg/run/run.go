@@ -12,6 +12,7 @@ import (
 	"github.com/kballard/go-shellquote"
 	"github.com/shirou/gopsutil/v3/process"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // recursive function to calculate whole process+childs memory usage
@@ -89,7 +90,9 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 
 	memUsageResult := make(chan uint64)
 
-	fmt.Println(commandStr)
+	if viper.GetBool("debug") {
+		fmt.Println(commandStr)
+	}
 
 	commandWords, err := shellquote.Split(commandStr)
 	if err != nil {

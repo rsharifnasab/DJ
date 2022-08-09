@@ -11,6 +11,7 @@ import (
 	"github.com/rsharifnasab/DJ/pkg/run"
 	"github.com/rsharifnasab/DJ/pkg/util"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func checkReq(submission *Submission) {
@@ -24,7 +25,11 @@ func checkReq(submission *Submission) {
 func runTestCase(submission *Submission, i int) (result *TestResult) {
 
 	command := fmt.Sprintf("%s/run.sh test %d", submission.sandboxDir, i)
-	stdout, err := run.JustOut(command)
+	stdout, stderr, err := run.DefaultRun(command)
+
+	// TODO: write stderr to file
+	_ = stderr
+
 	result = &TestResult{
 		Run: true,
 	}
@@ -73,6 +78,7 @@ func runTestCase(submission *Submission, i int) (result *TestResult) {
 		result.MalformedOutput = true
 		return
 	}
+
 }
 
 func testCount(submission *Submission) int {
@@ -85,13 +91,17 @@ func testCount(submission *Submission) int {
 }
 
 func compile(submission *Submission) {
-	fmt.Println("sandbox dir : " + submission.sandboxDir)
 	command := fmt.Sprintf("%s/run.sh compile", submission.sandboxDir)
 
-	err := run.JustRun(command)
+	stdout, stderr, err := run.DefaultRun(command)
 	if err != nil && err != run.NoOutputError {
 		cobra.CheckErr(fmt.Errorf("Compilation failed:\nerr: %w", err))
+	} else {
+		fmt.Println("Compilation successful")
 	}
+	_ = stdout
+	_ = stderr
+	// TODO: write them to the proper result dir
 }
 
 func initFolderWithoutTest(submission *Submission) {
@@ -107,7 +117,6 @@ func restoreCompiled(submission *Submission) {
 	err := os.RemoveAll(submission.sandboxDir)
 	cobra.CheckErr(err)
 	util.CopyDir(submission.CompiledState, submission.sandboxDir)
-	//fmt.Println("copy done")
 }
 
 func exploreTestGroups(submission *Submission) []*TestGroupResult {
@@ -133,17 +142,27 @@ func prepareTestGroup(submission *Submission, groupName string) {
 
 func RunSubmission(submission *Submission) *SubmissionResult {
 	submission.sandboxDir = util.MakeTempfolder()
-	defer os.RemoveAll(submission.sandboxDir)
 	submission.CompiledState = util.MakeTempfolder()
-	defer os.RemoveAll(submission.CompiledState)
+	if !viper.GetBool("debug") {
+		defer os.RemoveAll(submission.sandboxDir)
+		defer os.RemoveAll(submission.CompiledState)
+	}
 
-	// for each testgroup: testgroup to /testgroup
-	// TODO
+	if submission.Result == "" {
+		// reminder: we don't want to remove the result folder!
+		submission.Result = util.MakeTempfolder()
+	}
+	fmt.Printf("result dir: %v\n", submission.Result)
+
+	if viper.GetBool("debug") {
+		fmt.Printf("Sandbox  dir: %s\n", submission.sandboxDir)
+		fmt.Printf("compiled dir: %s\n", submission.CompiledState)
+	}
+
 	initFolderWithoutTest(submission)
 	checkReq(submission)
 
 	compile(submission)
-	fmt.Println("compile successful")
 	backupCompiled(submission)
 
 	submResult := &SubmissionResult{
