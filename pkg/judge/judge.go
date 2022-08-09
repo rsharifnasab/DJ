@@ -28,7 +28,7 @@ func runTestCase(submission *Submission, i int) (result *TestResult) {
 	stdout, stderr, err := run.DefaultRun(command)
 
 	// TODO: write stderr to file
-	_ = stderr
+	util.LogToResult(submission.Result, submission.currentGroup, strconv.Itoa(i), stderr)
 
 	result = &TestResult{
 		Run: true,
@@ -99,9 +99,8 @@ func compile(submission *Submission) {
 	} else {
 		fmt.Println("Compilation successful")
 	}
-	_ = stdout
-	_ = stderr
-	// TODO: write them to the proper result dir
+	util.LogToResult(submission.Result, "", "compile", stdout)
+	util.LogToResult(submission.Result, "", "compile", stderr)
 }
 
 func initFolderWithoutTest(submission *Submission) {
@@ -171,16 +170,12 @@ func RunSubmission(submission *Submission) *SubmissionResult {
 	}
 
 	for _, groupResult := range submResult.TestGroupResults {
-		//fmt.Println(" - - - - - - - testgroup: " + groupResult.Name + " - - - - - - - - -")
 		restoreCompiled(submission)
-		//fmt.Println("restore compile success")
 		prepareTestGroup(submission, groupResult.Name)
-		//fmt.Println("prepare test group success")
+		submission.currentGroup = groupResult.Name // for logging
 		groupResult.TestCount = testCount(submission)
 		for i := 1; i <= groupResult.TestCount; i++ {
-			//fmt.Println(" - - - testgroup[" + groupResult.Name + "] test" + strconv.Itoa(i) + " - - -")
 			testResult := runTestCase(submission, i)
-			//util.PrintStruct(testResult)
 			groupResult.TestResults = append(groupResult.TestResults, testResult)
 		}
 		fmt.Println(groupResult.String())

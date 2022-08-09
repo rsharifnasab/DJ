@@ -18,10 +18,8 @@ compare() {
     local EXPECTED_FILE="$2"
     local actual
     local expected
-    actual=$(xargs <"$ACTUAL_FILE" | tr '\n' ' ' |
-        awk '{gsub(/^ +| +$/,"")} { print $0 }')
-    expected=$(xargs <"$EXPECTED_FILE" | tr '\n' ' ' |
-        awk '{gsub(/^ +| +$/,"")} { print $0 }')
+    actual=$(  sed 's/[[:space:]]/ /g' < "$ACTUAL_FILE")
+    expected=$(sed 's/[[:space:]]/ /g' < "$EXPECTED_FILE")
     if [[ "$actual" == "$expected" ]]; then
         printf "pass"
     else
@@ -54,13 +52,12 @@ run_interpreter() {
     local inp_file="$2"
     local out_file="$3"
 
-    spim -a -f "$asm_file" <"$inp_file" >"$out_file" 1>&2
+    spim -a -quiet -f "$asm_file"  < "$inp_file"    > "$out_file" # 1>&2
 
     # more info here: http://courses.missouristate.edu/KenVollmar/MARS/Help/MarsHelpCommand.html
     #java -jar ./lib/mars.jar "nc" "ic" "me" "se1" "ae2" "100000" \
     #    "$compiled_file" > "$actual_out" 2> mars_log.txt || true
 }
-
 run_code() {
     local src_file="$1"
     local compiled_file="$2"
@@ -86,10 +83,13 @@ run_test() {
     #echerr "running test $test_name"
 
     run_log="$(run_code "$src_file" "$compiled_file")"
-    echerr "$run_log" >&2
+    echerr "----------<runlog>---------"
+    echerr "$run_log"
+    echerr "---------</runlog>---------"
+
 
     if grep -qi "semantic error" "$expected_file"; then
-        cp "$compiled_file" "$actual_out"
+        run_interpreter "$compiled_file" "$inp_file" "$actual_out" || cp "$compiled_file" "$actual_out"
     else
         run_interpreter "$compiled_file" "$inp_file" "$actual_out"
     fi

@@ -13,6 +13,7 @@ type Submission struct {
 	sandboxDir    string
 	CompiledState string
 	Result        string
+	currentGroup  string
 }
 
 func NewSubmission(path, runner, question string) *Submission {

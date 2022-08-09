@@ -9,6 +9,8 @@ import (
 func Run(submission *judge.Submission) {
 	submResult := judge.RunSubmission(submission)
 	fmt.Printf("%s\n", submResult.String())
+	fmt.Printf("result dir: %v\n", submission.Result)
+
 	//TODO: print student details and final score
 }
 
