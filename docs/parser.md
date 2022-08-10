@@ -45,3 +45,4 @@ func main() {
    + doesn't have go binding (at least by default) but python seems stable
    + can parse practically all languages
    + provide good information.
+   + sample output: [+](https://swapoff.org/chroma/playground/)
