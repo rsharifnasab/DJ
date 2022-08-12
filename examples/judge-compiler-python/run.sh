@@ -63,7 +63,6 @@ run_interpreter() {
 run_code() {
     local src_file="$1"
     local compiled_file="$2"
-    #java -cp "out:lib/*" Main -i "$src_file" -o "$compiled_file"
     python3 src/main.py -i "$src_file" -o "$compiled_file"
 }
 
