@@ -21,7 +21,7 @@ du -h bin/darwin.out
 
 cp -r ./examples/judge-compiler-* ./bin
 cp -r ./examples/question-compiler ./bin
-cp -r ./examples/COMPILER_README.txt ./bin
+cp -r ./examples/COMPILER_README.* ./bin
 (
 cd bin
 zip -q -r ./dist.zip -- ./*

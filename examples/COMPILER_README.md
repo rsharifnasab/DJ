@@ -10,17 +10,19 @@
 ./linux.out student -j ./judge-compiler-python -q ./question-compiler -s ./path/to/solution
 
 ```
+
+### java
 + for Java, your program is being called like this:
 ```bash
 javac -d out --release 11 -cp ".:lib/*" sources.txt
 java -cp "out:lib/*" Main -i /path/to/src/file -o /path/to/write/result.asm
 ```
-    + any jar file in the `lib` folder is included in Classpath
-    + your main should be in class "Main" without any package
++ any jar file in the `lib` folder is included in Classpath
++ your main should be in class "Main" without any package
 
-
+### python
 + for Python, your program is being called like this:
 ```bash
 python3 src/main.py -i /path/to/src/file -o /path/to/write/result.asm
 ```
-    + your main.py file is called.
++ your main.py file is called.
