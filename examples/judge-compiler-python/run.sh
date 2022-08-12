@@ -19,8 +19,8 @@ compare() {
     local actual
     local expected
     #actual="${ACTUAL_FILE//[[:space:]]/ }"
-    actual=$(  sed 's/[[:space:]]/ /g' < "$ACTUAL_FILE")
-    expected=$(sed 's/[[:space:]]/ /g' < "$EXPECTED_FILE")
+    actual=$(sed 's/[[:space:]]/ /g' <"$ACTUAL_FILE")
+    expected=$(sed 's/[[:space:]]/ /g' <"$EXPECTED_FILE")
     if [[ "$actual" == "$expected" ]]; then
         printf "pass"
     else
@@ -53,7 +53,12 @@ run_interpreter() {
     local inp_file="$2"
     local out_file="$3"
 
-    spim -a -quiet -f "$asm_file"  < "$inp_file"    > "$out_file" # 1>&2
+    spim -a -quiet -f "$asm_file" <"$inp_file" >"$out_file" 2>"spim.log" || true
+    cat "spim.log" 1>&2 || true
+    if grep -qi "error" "spim.log"; then
+        echerr "skipping spim"
+        cp "$asm_file" "$out_file"
+    fi
 
     # more info here: http://courses.missouristate.edu/KenVollmar/MARS/Help/MarsHelpCommand.html
     #java -jar ./lib/mars.jar "nc" "ic" "me" "se1" "ae2" "100000" \
@@ -89,12 +94,7 @@ run_test() {
     echerr "$run_log"
     echerr "---------</runlog>---------"
 
-
-    if grep -qi "semantic error" "$expected_file"; then
-        run_interpreter "$compiled_file" "$inp_file" "$actual_out" || cp "$compiled_file" "$actual_out"
-    else
-        run_interpreter "$compiled_file" "$inp_file" "$actual_out"
-    fi
+    run_interpreter "$compiled_file" "$inp_file" "$actual_out"
 
     result="$(compare "$actual_out" "$expected_file")"
     printf "test[%s] - %s\n" "$test_name" "$result"
