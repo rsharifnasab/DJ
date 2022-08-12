@@ -24,6 +24,6 @@ cp -r ./examples/question-compiler ./bin
 cp -r ./examples/COMPILER_README.* ./bin
 (
 cd bin
-zip -q -r ./dist.zip -- ./*
+zip -q -r ./compiler-phase3.zip -- ./*
 
 )
