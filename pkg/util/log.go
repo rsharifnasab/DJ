@@ -18,7 +18,7 @@ func NewLogger(basePath string) *Logger {
 	logger := &Logger{
 		BasePath:       basePath,
 		userBasePath:   basePath,
-		nonEmptyPath:   true,
+		nonEmptyPath:   false,
 		nonExistingDir: false,
 	}
 	if !IsDirExists(basePath) {
@@ -30,7 +30,7 @@ func NewLogger(basePath string) *Logger {
 		createdPath, err := os.MkdirTemp(basePath, "dj-result-*")
 		cobra.CheckErr(err)
 		logger.BasePath = createdPath
-		logger.nonEmptyPath = false
+		logger.nonEmptyPath = true
 	}
 	return logger
 }
