@@ -7,7 +7,7 @@ import (
 )
 
 func Run(submission *judge.Submission) {
-	submResult := judge.RunSubmission(submission)
+	submResult := submission.Run()
 	fmt.Printf("%s\n", submResult.String())
 	fmt.Printf("result dir: %v\n", submission.Result)
 

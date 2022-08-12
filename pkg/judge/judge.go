@@ -150,7 +150,11 @@ func (submission *Submission) initLogger() {
 	submission.Result = submission.logger.BasePath
 }
 
-func RunSubmission(submission *Submission) *SubmissionResult {
+func (submission *Submission) createZipResult() {
+
+}
+
+func (submission *Submission) Run() *SubmissionResult {
 	submission.initLogger()
 	fmt.Printf("result dir: %v\n", submission.Result)
 
@@ -188,6 +192,8 @@ func RunSubmission(submission *Submission) *SubmissionResult {
 		}
 		fmt.Println(groupResult.String())
 	}
+
+	submission.createZipResult()
 
 	return submResult
 
