@@ -26,7 +26,7 @@ func ZipDir(filename string, dir string) error {
 		return err
 	}
 	defer func(cwd string) {
-		err = os.Chdir(dir)
+		err = os.Chdir(cwd)
 		if err != nil {
 			panic(err)
 		}
