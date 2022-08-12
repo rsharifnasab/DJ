@@ -1,22 +1,49 @@
 package util
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
-func LogToResult(basePath, midPath, fileName string, data string) {
+type Logger struct {
+	userBasePath   string
+	BasePath       string
+	nonEmptyPath   bool
+	nonExistingDir bool
+}
+
+func NewLogger(basePath string) *Logger {
+	logger := &Logger{
+		BasePath:       basePath,
+		userBasePath:   basePath,
+		nonEmptyPath:   true,
+		nonExistingDir: false,
+	}
+	if !IsDirExists(basePath) {
+		err := os.Mkdir(basePath, os.ModePerm)
+		cobra.CheckErr(err)
+		logger.nonExistingDir = true
+	}
+	if !IsDirEmpty(basePath) {
+		createdPath, err := os.MkdirTemp(basePath, "dj-result-*")
+		cobra.CheckErr(err)
+		logger.BasePath = createdPath
+		logger.nonEmptyPath = false
+	}
+	return logger
+}
+
+func (logger *Logger) LogTo(midPath, fileName string, data string) {
 	var logDir string
 	if midPath == "" {
-		logDir = basePath
+		logDir = logger.BasePath
 	} else {
-		logDir = basePath + "/" + midPath
+		logDir = logger.BasePath + "/" + midPath
 	}
 
-	if _, err := os.Stat(logDir); errors.Is(err, os.ErrNotExist) {
+	if !IsDirExists(logDir) {
 		err := os.Mkdir(logDir, os.ModePerm)
 		cobra.CheckErr(err)
 	}

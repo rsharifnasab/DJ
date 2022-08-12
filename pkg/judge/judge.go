@@ -14,6 +14,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var logger util.Logger
+
 func checkReq(submission *Submission) {
 	stdout, err := run.JustOut(submission.sandboxDir + "/req.sh")
 	cobra.CheckErr(err)
@@ -28,7 +30,7 @@ func runTestCase(submission *Submission, i int) (result *TestResult) {
 	stdout, stderr, err := run.DefaultRun(command)
 
 	// TODO: write stderr to file
-	util.LogToResult(submission.Result, submission.currentGroup, strconv.Itoa(i), stderr)
+	submission.logger.LogTo(submission.currentGroup, strconv.Itoa(i), stderr)
 
 	result = &TestResult{
 		Run: true,
@@ -99,8 +101,8 @@ func compile(submission *Submission) {
 	} else {
 		fmt.Println("Compilation successful")
 	}
-	util.LogToResult(submission.Result, "", "compile", stdout)
-	util.LogToResult(submission.Result, "", "compile", stderr)
+	submission.logger.LogTo("", "compile", stdout)
+	submission.logger.LogTo("", "compile", stderr)
 }
 
 func initFolderWithoutTest(submission *Submission) {
@@ -139,19 +141,25 @@ func prepareTestGroup(submission *Submission, groupName string) {
 	util.CopyDir(src, dest)
 }
 
+func (submission *Submission) initLogger() {
+	if submission.Result == "" {
+		// reminder: we don't want to remove the result folder!
+		submission.Result = util.MakeTempfolder()
+	}
+	submission.logger = util.NewLogger(submission.Result)
+	submission.Result = submission.logger.BasePath
+}
+
 func RunSubmission(submission *Submission) *SubmissionResult {
+	submission.initLogger()
+	fmt.Printf("result dir: %v\n", submission.Result)
+
 	submission.sandboxDir = util.MakeTempfolder()
 	submission.CompiledState = util.MakeTempfolder()
 	if !viper.GetBool("debug") {
 		defer os.RemoveAll(submission.sandboxDir)
 		defer os.RemoveAll(submission.CompiledState)
 	}
-
-	if submission.Result == "" {
-		// reminder: we don't want to remove the result folder!
-		submission.Result = util.MakeTempfolder()
-	}
-	fmt.Printf("result dir: %v\n", submission.Result)
 
 	if viper.GetBool("debug") {
 		fmt.Printf("Sandbox  dir: %s\n", submission.sandboxDir)
@@ -179,8 +187,6 @@ func RunSubmission(submission *Submission) *SubmissionResult {
 			groupResult.TestResults = append(groupResult.TestResults, testResult)
 		}
 		fmt.Println(groupResult.String())
-		//time.Sleep(5 * time.Second)
-
 	}
 
 	return submResult
