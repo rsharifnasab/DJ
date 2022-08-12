@@ -35,3 +35,25 @@ func TestDirNotExists(t *testing.T) {
 
 	assert.False(t, IsDirExists(tmp+"/subfolder"))
 }
+
+func TestWalk(t *testing.T) {
+	var err error
+
+	tmp := MakeTempfolder()
+	defer os.RemoveAll(tmp)
+	err = os.MkdirAll(tmp+"/a/b/c/d", 0777)
+	assert.NoError(t, err)
+
+	err = os.WriteFile(tmp+"/r1.txt", []byte("dummy text to write"), 0666)
+	assert.Nil(t, err)
+
+	err = os.WriteFile(tmp+"/a/a1.txt", []byte("dummy text to write"), 0666)
+	assert.NoError(t, err)
+	err = os.WriteFile(tmp+"/a/a2.txt", []byte("dummy text to write"), 0666)
+	assert.NoError(t, err)
+	err = os.WriteFile(tmp+"/a/b/c/d/d1.txt", []byte("dummy text to write"), 0666)
+	assert.NoError(t, err)
+
+	list, err := WalkDir(tmp)
+	assert.Len(t, list, 4)
+}

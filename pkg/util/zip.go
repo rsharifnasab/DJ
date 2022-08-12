@@ -6,9 +6,45 @@ import (
 	"os"
 )
 
-// ZipFiles compresses one or many files into a single zip archive file.
-// Param 1: filename is the output zip file's name.
-// Param 2: files is a list of files to add to the zip.
+func ZipDirNaive(filename string, dirs []string) error {
+	list := make([]string, 0)
+	for _, dir := range dirs {
+		dirList, err := WalkDir(dir)
+		if err != nil {
+			return err
+		}
+		list = append(list, dirList...)
+	}
+	return ZipFiles(filename, list)
+}
+
+func ZipDir(filename string, dir string) error {
+	var err error
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	defer func(cwd string) {
+		err = os.Chdir(dir)
+		if err != nil {
+			panic(err)
+		}
+	}(cwd)
+
+	err = os.Chdir(dir)
+	if err != nil {
+		return err
+	}
+
+	list, err := WalkDir(".")
+	if err != nil {
+		return err
+	}
+
+	return ZipFiles(filename, list)
+}
+
 func ZipFiles(filename string, files []string) error {
 
 	newZipFile, err := os.Create(filename)
@@ -22,14 +58,14 @@ func ZipFiles(filename string, files []string) error {
 
 	// Add files to zip
 	for _, file := range files {
-		if err = AddFileToZip(zipWriter, file); err != nil {
+		if err = addFileToZip(zipWriter, file); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func AddFileToZip(zipWriter *zip.Writer, filename string) error {
+func addFileToZip(zipWriter *zip.Writer, filename string) error {
 
 	fileToZip, err := os.Open(filename)
 	if err != nil {

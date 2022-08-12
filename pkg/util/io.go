@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 
 	cp "github.com/otiai10/copy"
 	"github.com/spf13/cobra"
@@ -41,4 +42,21 @@ func IsDirExists(dir string) bool {
 		cobra.CheckErr(err)
 		return true
 	}
+}
+
+func WalkDir(dir string) ([]string, error) {
+	list := make([]string, 0)
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			list = append(list, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
 }

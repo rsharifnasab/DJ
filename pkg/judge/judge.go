@@ -151,7 +151,9 @@ func (submission *Submission) initLogger() {
 }
 
 func (submission *Submission) createZipResult() {
-
+	util.ZipDir(submission.Result+"/submission.zip",
+		submission.Solution,
+	)
 }
 
 func (submission *Submission) Run() *SubmissionResult {
