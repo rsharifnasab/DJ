@@ -2,22 +2,9 @@ package util
 
 import (
 	"archive/zip"
-	"fmt"
 	"io"
 	"os"
 )
-
-func main() {
-
-	// List of Files to Zip
-	files := []string{"example.csv", "data.csv"}
-	output := "done.zip"
-
-	if err := ZipFiles(output, files); err != nil {
-		panic(err)
-	}
-	fmt.Println("Zipped File:", output)
-}
 
 // ZipFiles compresses one or many files into a single zip archive file.
 // Param 1: filename is the output zip file's name.

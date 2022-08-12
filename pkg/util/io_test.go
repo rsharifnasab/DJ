@@ -17,7 +17,7 @@ func TestDirEmpty(t *testing.T) {
 func TestDirNotEmpty(t *testing.T) {
 	tmp := MakeTempfolder()
 	defer os.RemoveAll(tmp)
-	err := os.WriteFile(tmp+"/dummy.txt", []byte("dummpy text to write"), 0666)
+	err := os.WriteFile(tmp+"/dummy.txt", []byte("dummy text to write"), 0666)
 	cobra.CheckErr(err)
 
 	assert.False(t, IsDirEmpty(tmp))
