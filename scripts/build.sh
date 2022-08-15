@@ -11,7 +11,7 @@ mkdir bin
 go test "./..." -count=1
 go vet "./..."
 
-GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o bin/linux.out
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-w -s" -o bin/linux.out
 du -h bin/linux.out
 
 GOOS=windows GOARCH=amd64 go build -ldflags="-w -s" -o bin/windows.exe
