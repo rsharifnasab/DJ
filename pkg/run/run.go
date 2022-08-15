@@ -8,9 +8,10 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"path/filepath"
 
-	"github.com/kballard/go-shellquote"
 	"github.com/shirou/gopsutil/v3/process"
+	"github.com/kballard/go-shellquote"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -91,16 +92,18 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	memUsageResult := make(chan uint64)
 
 	if viper.GetBool("debug") {
-		fmt.Println(commandStr)
+		fmt.Println("command: 	" + commandStr)
 	}
 
-	commandWords, err := shellquote.Split(commandStr)
+	commandUnix := filepath.ToSlash(commandStr)
+	commandWords, err := shellquote.Split(commandUnix)
 	if err != nil {
 		return "", "", MalformedCommandError
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel() // cleanup resources eventually
+
 
 	// Create the command with our context
 	execCmd := exec.CommandContext(ctx, commandWords[0], commandWords[1:]...)
@@ -130,7 +133,8 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	err = execCmd.Start()
 	if err != nil {
 		switch err.(type) {
-		case *fs.PathError:
+		//   linux        , windows
+		case *fs.PathError, *exec.Error:
 			//fmt.Println(err.Error())
 			return "", "", NotValidExecutableError
 

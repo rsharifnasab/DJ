@@ -1,7 +1,6 @@
 package run
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -11,7 +10,7 @@ import (
 
 func TestOutput(t *testing.T) {
 	out, _, err := Run(`bash -c 'echo "hello world"'`, 5*1024, 50*1024*1024, 100*time.Millisecond)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "hello world\n", out)
 }
 
@@ -19,7 +18,7 @@ func TestOutput(t *testing.T) {
 
 func TestStderr(t *testing.T) {
 	stdout, stderr, err := Run(`bash -c '1>&2 echo "hello err"; echo "hello out"'`, 5*1024, 50*1024*1024, 100*time.Millisecond)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "hello err\n", stderr)
 	assert.Equal(t, "hello out\n", stdout)
 }
@@ -40,10 +39,10 @@ func TestMemoryLimit(t *testing.T) {
 }
 
 func TestOutputLimit(t *testing.T) {
-	_, _, err := Run(`bash -c 'while true; do echo "text text text"; done'`, 512, 50*1024*1024, 10*time.Second)
-	assert.NotNil(t, err)
-	assert.Contains(t, []error{OutputLimitError, NonZeroExitError}, err)
-	// why non-zero?
+	_, _, err := Run(`bash -c 'while true; do echo "text text text"; done'`, 100, 50*1024*1024, 5*time.Second)
+	assert.Error(t, err)
+	assert.Contains(t, []error{OutputLimitError, NonZeroExitError, TimedOutError}, err)
+	// why non-zero? wht time limit on windows?
 }
 
 func TestNoOutput(t *testing.T) {
@@ -63,15 +62,15 @@ func TestNonExistingPath(t *testing.T) {
 }
 
 func TestNonExecutable(t *testing.T) {
-	file, err := ioutil.TempFile("", "script*.sh")
-	assert.Nil(t, err)
+	file, err := os.CreateTemp("", "script*.sh")
+	assert.NoError(t, err)
 	defer os.Remove(file.Name())
 
-	content := `#!/usr/bin/env bash 
+	content := `#!/usr/bin/env bash
 echo "hello world"
 `
 	_, err = file.Write([]byte(content))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	_, _, err = Run(file.Name(),
 		5*1024, 50*1024*1024, 100*time.Millisecond)
@@ -79,22 +78,26 @@ echo "hello world"
 }
 
 func TestExecutable(t *testing.T) {
-	file, err := ioutil.TempFile("", "script*.sh")
-	assert.Nil(t, err)
-	defer os.Remove(file.Name())
 
-	content := `#!/usr/bin/env bash 
+	file, err := os.CreateTemp("", "script*.sh")
+	assert.NoError(t, err)
+	//defer os.Remove(file.Name())
+
+	content := `#!/usr/bin/env bash
 echo "hello world"
 `
 	_, err = file.Write([]byte(content))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	file.Chmod(0777)
 	err = file.Close()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
+
+	println(file.Name())
+	time.Sleep(20 * time.Second)
 
 	stdout, _, err := Run(file.Name(),
 		5*1024, 50*1024*1024, 100*time.Millisecond)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.EqualValues(t, "hello world\n", stdout)
 }

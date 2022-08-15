@@ -2,7 +2,6 @@ package judge
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strconv"
@@ -123,7 +122,7 @@ func restoreCompiled(submission *Submission) {
 func exploreTestGroups(submission *Submission) []*TestGroupResult {
 	res := make([]*TestGroupResult, 0, 10)
 
-	files, err := ioutil.ReadDir(submission.Question)
+	files, err := os.ReadDir(submission.Question)
 	cobra.CheckErr(err)
 	for _, f := range files {
 		testGroup := &TestGroupResult{
