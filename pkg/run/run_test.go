@@ -93,9 +93,6 @@ echo "hello world"
 	err = file.Close()
 	assert.NoError(t, err)
 
-	println(file.Name())
-	time.Sleep(20 * time.Second)
-
 	stdout, _, err := Run(file.Name(),
 		5*1024, 50*1024*1024, 100*time.Millisecond)
 	assert.NoError(t, err)
