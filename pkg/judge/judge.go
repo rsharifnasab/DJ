@@ -95,13 +95,13 @@ func compile(submission *Submission) {
 	command := fmt.Sprintf("%s/run.sh compile", submission.sandboxDir)
 
 	stdout, stderr, err := run.DefaultRun(command)
+	submission.logger.LogTo("", "compile", stdout)
+	submission.logger.LogTo("", "compile", stderr)
 	if err != nil && err != run.NoOutputError {
-		cobra.CheckErr(fmt.Errorf("Compilation failed:\nerr: %w", err))
+		cobra.CheckErr(fmt.Errorf("compilation failed:\nerr: %w", err))
 	} else {
 		fmt.Println("Compilation successful")
 	}
-	submission.logger.LogTo("", "compile", stdout)
-	submission.logger.LogTo("", "compile", stderr)
 }
 
 func initFolderWithoutTest(submission *Submission) {

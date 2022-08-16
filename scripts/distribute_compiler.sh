@@ -3,27 +3,22 @@ set -e
 set -o pipefail
 set -o nounset
 
-rm -rf bin
-mkdir bin
+./scripts/build.sh
 
-go test "./..." -count=1
-go vet "./..."
+if false; then
+    readonly MARS_URL="https://courses.missouristate.edu/KenVollmar/mars/MARS_4_5_Aug2014/Mars4_5.jar"
+    readonly java_mars="./examples/judge-compiler-java/mars.jar"
+    readonly python_mars="./examples/judge-compiler-python/mars.jar"
 
-
-GOOS=linux   GOARCH=amd64 go build -ldflags="-w -s"  -o bin/linux.out
-du -h bin/linux.out
-
-GOOS=windows GOARCH=amd64 go build -ldflags="-w -s"  -o bin/windows.exe
-du -h bin/windows.exe
-
-GOOS=darwin  GOARCH=amd64 go build -ldflags="-w -s"  -o bin/darwin.out
-du -h bin/darwin.out
+    [[ -e "$java_mars" ]] || curl -o "$java_mars" "$MARS_URL"
+    [[ -e "$python_mars" ]] || cp "$java_mars" "$python_mars"
+fi
 
 cp -r ./examples/judge-compiler-* ./bin
 cp -r ./examples/question-compiler ./bin
 cp -r ./examples/COMPILER_README.* ./bin
 (
-cd bin
-zip -q -r ./compiler-phase3.zip -- ./*
+    cd bin
+    zip -q -r ./compiler-phase3.zip -- ./*
 
 )

@@ -58,10 +58,19 @@ run_interpreter() {
         echerr "skipping spim"
         cp "$asm_file" "$out_file"
     fi
+    if head -1 "$out_file" | grep  -q "SPIM Version" ; then
+        echerr "old spim detected"
+        sed -i "1,5d" "$out_file"
+    fi
 
-    # more info here: http://courses.missouristate.edu/KenVollmar/MARS/Help/MarsHelpCommand.html
-    #java -jar ./lib/mars.jar "nc" "ic" "me" "se1" "ae2" "100000" \
-    #    "$compiled_file" > "$actual_out" 2> mars_log.txt || true
+    # more info here:
+    # http://courses.missouristate.edu/KenVollmar/MARS/Help/MarsHelpCommand.html
+    #java -jar ./mars.jar "nc" "ic" "me" "se1" "ae2" "100000" \
+    #    "$asm_file"  < "$inp_file"  > "$out_file" || {
+    #    echerr "skipping spim"
+    #    cp "$asm_file" "$out_file"
+    #}
+
 }
 run_code() {
     local src_file="$1"
