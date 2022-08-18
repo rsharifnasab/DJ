@@ -12,6 +12,7 @@ type Submission struct {
 	Solution      string
 	Judger        string
 	Question      string
+	Language      string
 	sandboxDir    string
 	CompiledState string
 	Result        string

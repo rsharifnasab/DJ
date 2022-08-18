@@ -1,6 +1,5 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -55,6 +54,8 @@ func init() {
 	studentCmd.PersistentFlags().StringVarP(
 		&submission.Result, "result", "r",
 		"", "where to save result and logs")
-	//err = studentCmd.MarkPersistentFlagRequired("result")
-	//cobra.CheckErr(err)
+
+	studentCmd.PersistentFlags().StringVarP(
+		&submission.Language, "language", "l",
+		"", "your code's language")
 }

@@ -2,7 +2,8 @@
 set -euo pipefail
 
 readonly COMMAND="$1" #"count" or "test"
-readonly TEST_NUMBER="${2:-0}"
+readonly LANG="$2"    #
+readonly TEST_NUMBER="${3:-0}"
 
 echerr() {
     echo "$@" 1>&2
@@ -18,7 +19,6 @@ compare() {
     local EXPECTED_FILE="$2"
     local actual
     local expected
-    #actual="${ACTUAL_FILE//[[:space:]]/ }"
     actual=$(sed 's/[[:space:]]/ /g' <"$ACTUAL_FILE")
     expected=$(sed 's/[[:space:]]/ /g' <"$EXPECTED_FILE")
     if [[ "$actual" == "$expected" ]]; then
@@ -59,6 +59,10 @@ run_interpreter() {
         echerr "skipping spim"
         cp "$asm_file" "$out_file"
     fi
+    if head -1 "$out_file" | grep  -q "SPIM Version" ; then
+        echerr "old spim detected"
+        sed -i "1,5d" "$out_file"
+    fi
 
     # more info here:
     # http://courses.missouristate.edu/KenVollmar/MARS/Help/MarsHelpCommand.html
@@ -68,12 +72,6 @@ run_interpreter() {
     #    cp "$asm_file" "$out_file"
     #}
 
-}
-
-run_code() {
-    local src_file="$1"
-    local compiled_file="$2"
-    python3 src/main.py -i "$src_file" -o "$compiled_file"
 }
 
 run_test() {
@@ -110,10 +108,20 @@ clean() {
     rm "actual.txt"
 }
 
+run_code() {
+    src_file="$1"
+    compiled_file="$2"
+    "./lang/${LANG}.sh" run "$src_file" "$compiled_file"
+}
+
+compile_code() {
+    "./lang/${LANG}.sh" compile
+}
+
 main() {
     cd -P -- "$(dirname -- "$0")"
     if [[ "compile" == "$COMMAND" ]]; then
-        ./compile.sh
+        compile_code
     elif [[ "count" == "$COMMAND" ]]; then
         test_count
     elif [[ "test" == "$COMMAND" ]]; then

@@ -25,7 +25,7 @@ func checkReq(submission *Submission) {
 
 func runTestCase(submission *Submission, i int) (result *TestResult) {
 
-	command := fmt.Sprintf("%s/run.sh test %d", submission.sandboxDir, i)
+	command := fmt.Sprintf("%s/run.sh test %s %d", submission.sandboxDir, submission.Language, i)
 	stdout, stderr, err := run.DefaultRun(command)
 
 	// TODO: write stderr to file
@@ -83,7 +83,8 @@ func runTestCase(submission *Submission, i int) (result *TestResult) {
 }
 
 func testCount(submission *Submission) int {
-	command := fmt.Sprintf("%s/run.sh count", submission.sandboxDir)
+	command := fmt.Sprintf("%s/run.sh count %s",
+		submission.sandboxDir, submission.Language)
 	stdout, err := run.JustOut(command)
 	cobra.CheckErr(err)
 	n, err := strconv.Atoi(strings.TrimSpace(stdout))
@@ -92,7 +93,8 @@ func testCount(submission *Submission) int {
 }
 
 func compile(submission *Submission) {
-	command := fmt.Sprintf("%s/run.sh compile", submission.sandboxDir)
+	command := fmt.Sprintf("%s/run.sh compile %s",
+		submission.sandboxDir, submission.Language)
 
 	stdout, stderr, err := run.DefaultRun(command)
 	submission.logger.LogTo("", "compile", stdout)
@@ -155,7 +157,14 @@ func (submission *Submission) createZipResult() {
 	)
 }
 
+func (submission *Submission) initFields() {
+	if submission.Language == "" {
+		submission.Language = "generic"
+	}
+}
+
 func (submission *Submission) Run() *SubmissionResult {
+	submission.initFields()
 	submission.initLogger()
 	fmt.Printf("result dir: %v\n", submission.Result)
 
