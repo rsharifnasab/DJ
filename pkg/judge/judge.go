@@ -159,7 +159,11 @@ func (submission *Submission) createZipResult() {
 
 func (submission *Submission) initFields() {
 	if submission.Language == "" {
-		submission.Language = "generic"
+		if lang, err := util.AutoDetectLanguage(submission.Solution); err != nil {
+			submission.Language = "generic"
+		} else {
+			submission.Language = lang
+		}
 	}
 }
 
