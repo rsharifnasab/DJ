@@ -14,5 +14,6 @@ import (
 func main() {
 	viper.Set("debug", true)
 	rand.Seed(time.Now().UnixNano())
+
 	cmd.Execute()
 }
