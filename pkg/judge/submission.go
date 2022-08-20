@@ -4,23 +4,20 @@ import (
 	"fmt"
 	"math"
 	"strings"
+
+	"github.com/rsharifnasab/DJ/pkg/util"
 )
 
 type Submission struct {
 	Solution      string
 	Judger        string
 	Question      string
+	Language      string
 	sandboxDir    string
 	CompiledState string
-}
-
-func NewSubmission(path, runner, question string) *Submission {
-	submission := &Submission{
-		Solution: path,
-		Judger:   runner,
-		Question: question,
-	}
-	return submission
+	Result        string
+	currentGroup  string
+	logger        *util.Logger
 }
 
 type TestResult struct {

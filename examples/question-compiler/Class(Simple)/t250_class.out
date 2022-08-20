@@ -1,0 +1,26 @@
+Player1 choose your point:
+X|E|E
+E|E|E
+E|E|E
+player2 choose your point:
+X|E|E
+E|O|E
+E|E|E
+player1 choose your point:
+X|E|E
+E|O|E
+E|E|X
+player2 choose your point:
+X|O|E
+E|O|E
+E|E|X
+player1 choose your point:
+X|O|E
+X|O|E
+E|E|X
+player2 choose your point:
+X|O|O
+X|O|E
+E|E|X
+player1 choose your point:
+Player 1 winnes!

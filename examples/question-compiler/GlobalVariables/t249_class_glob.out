@@ -1,0 +1,193 @@
+Welcome to CS143 BlackJack!
+
+---------------------------
+
+Please enter a random number seed: 
+Shuffling...
+done.
+
+How many players do we have today? 
+What is the name of player #1? 
+What is the name of player #2? 
+What is the name of player #3? 
+
+First, let's take bets.
+
+SmsS, you have $1000.
+
+How much would you like to bet? 
+Kesha, you have $1000.
+
+How much would you like to bet? 
+Sepehr, you have $1000.
+
+How much would you like to bet? 
+
+Dealer starts. 
+Dealer was dealt a 11.
+
+
+SmsS's turn.
+
+SmsS was dealt a 4.
+
+SmsS was dealt a 7.
+
+Would you like to double down? (y/n) 
+SmsS was dealt a 9.
+
+SmsS, your total is 20.
+
+SmsS stays at 20.
+
+
+Kesha's turn.
+
+Kesha was dealt a 11.
+
+Kesha was dealt a 9.
+
+Kesha, your total is 20.
+
+Would you like a hit? (y/n) 
+Kesha stays at 20.
+
+
+Sepehr's turn.
+
+Sepehr was dealt a 5.
+
+Sepehr was dealt a 5.
+
+Would you like to double down? (y/n) 
+Sepehr was dealt a 5.
+
+Sepehr, your total is 15.
+
+Sepehr stays at 15.
+
+
+Dealer's turn.
+
+Dealer was dealt a 10.
+
+Dealer stays at 21.
+
+
+Time to resolve bets.
+
+SmsS, you lost $200.
+
+Kesha, you lost $200.
+
+Sepehr, you lost $600.
+
+
+Do you want to play another hand? (y/n) 
+
+First, let's take bets.
+
+SmsS, you have $800.
+
+How much would you like to bet? 
+Kesha, you have $800.
+
+How much would you like to bet? 
+Sepehr, you have $400.
+
+How much would you like to bet? 
+
+Dealer starts. 
+Dealer was dealt a 5.
+
+
+SmsS's turn.
+
+SmsS was dealt a 10.
+
+SmsS was dealt a 2.
+
+SmsS, your total is 12.
+
+Would you like a hit? (y/n) 
+SmsS was dealt a 3.
+
+SmsS, your total is 15.
+
+Would you like a hit? (y/n) 
+SmsS was dealt a 4.
+
+SmsS, your total is 19.
+
+Would you like a hit? (y/n) 
+SmsS stays at 19.
+
+
+Kesha's turn.
+
+Kesha was dealt a 11.
+
+Kesha was dealt a 2.
+
+Kesha, your total is 13.
+
+Would you like a hit? (y/n) 
+Kesha stays at 13.
+
+
+Sepehr's turn.
+
+Sepehr was dealt a 11.
+
+Sepehr was dealt a 4.
+
+Sepehr, your total is 15.
+
+Would you like a hit? (y/n) 
+Sepehr was dealt a 5.
+
+Sepehr, your total is 20.
+
+Would you like a hit? (y/n) 
+Sepehr was dealt a 2.
+
+Sepehr, your total is 12.
+
+Would you like a hit? (y/n) 
+Sepehr stays at 12.
+
+
+Dealer's turn.
+
+Dealer was dealt a 8.
+
+Dealer was dealt a 3.
+
+Dealer was dealt a 7.
+
+Dealer busts with the big 23!
+
+
+Time to resolve bets.
+
+SmsS, you won $10.
+
+Kesha, you won $100.
+
+Sepehr, you won $200.
+
+
+Do you want to play another hand? (y/n) 
+SmsS, you have $810.
+
+Kesha, you have $900.
+
+Sepehr, you have $600.
+
+Thank you for playing...come again soon.
+
+
+CS143 BlackJack Copyright (c) 1999 by Peter Mork.
+
+(2001 mods by jdz)
+

@@ -1,0 +1,14 @@
+This program will read in a bunch of numbers and print them
+back out in sorted order.
+How many scores?
+Enter next number:
+Enter next number:
+Enter next number:
+Enter next number:
+Enter next number:
+Sorted results:
+-6
+1
+3
+4
+7

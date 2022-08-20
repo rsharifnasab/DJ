@@ -1,12 +1,9 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/rsharifnasab/DJ/pkg/judge"
 	"github.com/rsharifnasab/DJ/pkg/student"
 	"github.com/spf13/cobra"
@@ -25,7 +22,6 @@ and usage of using your command. For example:
 
 students can run and test thier codes via this command`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("student cmd")
 		student.Run(&submission)
 	},
 }
@@ -55,4 +51,11 @@ func init() {
 	err = studentCmd.MarkPersistentFlagRequired("question")
 	cobra.CheckErr(err)
 
+	studentCmd.PersistentFlags().StringVarP(
+		&submission.Result, "result", "r",
+		"", "where to save result and logs")
+
+	studentCmd.PersistentFlags().StringVarP(
+		&submission.Language, "language", "l",
+		"", "your code's language")
 }

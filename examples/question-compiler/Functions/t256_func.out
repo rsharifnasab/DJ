@@ -1,0 +1,30 @@
+Factorial(1) = 1
+
+Factorial(2) = 2
+
+Factorial(3) = 6
+
+Factorial(4) = 24
+
+Factorial(5) = 120
+
+Factorial(6) = 720
+
+Factorial(7) = 5040
+
+Factorial(8) = 40320
+
+Factorial(9) = 362880
+
+Factorial(10) = 3628800
+
+Factorial(11) = 39916800
+
+Factorial(12) = 479001600
+
+Factorial(13) = 1932053504
+
+Factorial(14) = 1278945280
+
+Factorial(15) = 2004310016
+

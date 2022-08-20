@@ -2,7 +2,6 @@ package judge
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strconv"
@@ -11,7 +10,10 @@ import (
 	"github.com/rsharifnasab/DJ/pkg/run"
 	"github.com/rsharifnasab/DJ/pkg/util"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+var logger util.Logger
 
 func checkReq(submission *Submission) {
 	stdout, err := run.JustOut(submission.sandboxDir + "/req.sh")
@@ -23,8 +25,12 @@ func checkReq(submission *Submission) {
 
 func runTestCase(submission *Submission, i int) (result *TestResult) {
 
-	command := fmt.Sprintf("%s/run.sh test %d", submission.sandboxDir, i)
-	stdout, err := run.JustOut(command)
+	command := fmt.Sprintf("%s/run.sh test %s %d", submission.sandboxDir, submission.Language, i)
+	stdout, stderr, err := run.DefaultRun(command)
+
+	// TODO: write stderr to file
+	submission.logger.LogTo(submission.currentGroup, strconv.Itoa(i), stderr)
+
 	result = &TestResult{
 		Run: true,
 	}
@@ -73,10 +79,12 @@ func runTestCase(submission *Submission, i int) (result *TestResult) {
 		result.MalformedOutput = true
 		return
 	}
+
 }
 
 func testCount(submission *Submission) int {
-	command := fmt.Sprintf("%s/run.sh count", submission.sandboxDir)
+	command := fmt.Sprintf("%s/run.sh count %s",
+		submission.sandboxDir, submission.Language)
 	stdout, err := run.JustOut(command)
 	cobra.CheckErr(err)
 	n, err := strconv.Atoi(strings.TrimSpace(stdout))
@@ -85,12 +93,16 @@ func testCount(submission *Submission) int {
 }
 
 func compile(submission *Submission) {
-	fmt.Println("sandbox dir : " + submission.sandboxDir)
-	command := fmt.Sprintf("%s/run.sh compile", submission.sandboxDir)
+	command := fmt.Sprintf("%s/run.sh compile %s",
+		submission.sandboxDir, submission.Language)
 
-	err := run.JustRun(command)
+	stdout, stderr, err := run.DefaultRun(command)
+	submission.logger.LogTo("", "compile", stdout)
+	submission.logger.LogTo("", "compile", stderr)
 	if err != nil && err != run.NoOutputError {
-		cobra.CheckErr(fmt.Errorf("Compilation failed:\nerr: %w", err))
+		cobra.CheckErr(fmt.Errorf("compilation failed:\nerr: %w", err))
+	} else {
+		fmt.Println("Compilation successful")
 	}
 }
 
@@ -107,13 +119,12 @@ func restoreCompiled(submission *Submission) {
 	err := os.RemoveAll(submission.sandboxDir)
 	cobra.CheckErr(err)
 	util.CopyDir(submission.CompiledState, submission.sandboxDir)
-	//fmt.Println("copy done")
 }
 
 func exploreTestGroups(submission *Submission) []*TestGroupResult {
 	res := make([]*TestGroupResult, 0, 10)
 
-	files, err := ioutil.ReadDir(submission.Question)
+	files, err := os.ReadDir(submission.Question)
 	cobra.CheckErr(err)
 	for _, f := range files {
 		testGroup := &TestGroupResult{
@@ -131,19 +142,52 @@ func prepareTestGroup(submission *Submission, groupName string) {
 	util.CopyDir(src, dest)
 }
 
-func RunSubmission(submission *Submission) *SubmissionResult {
-	submission.sandboxDir = util.MakeTempfolder()
-	defer os.RemoveAll(submission.sandboxDir)
-	submission.CompiledState = util.MakeTempfolder()
-	defer os.RemoveAll(submission.CompiledState)
+func (submission *Submission) initLogger() {
+	if submission.Result == "" {
+		// reminder: we don't want to remove the result folder!
+		submission.Result = util.MakeTempfolder()
+	}
+	submission.logger = util.NewLogger(submission.Result)
+	submission.Result = submission.logger.BasePath
+}
 
-	// for each testgroup: testgroup to /testgroup
-	// TODO
+func (submission *Submission) createZipResult() {
+	util.ZipDir(submission.Result+"/submission.zip",
+		submission.Solution,
+	)
+}
+
+func (submission *Submission) initFields() {
+	if submission.Language == "" {
+		if lang, err := util.AutoDetectLanguage(submission.Solution); err != nil {
+			submission.Language = "generic"
+		} else {
+			submission.Language = lang
+		}
+	}
+}
+
+func (submission *Submission) Run() *SubmissionResult {
+	submission.initFields()
+	submission.initLogger()
+	fmt.Printf("result dir: %v\n", submission.Result)
+
+	submission.sandboxDir = util.MakeTempfolder()
+	submission.CompiledState = util.MakeTempfolder()
+	if !viper.GetBool("debug") {
+		defer os.RemoveAll(submission.sandboxDir)
+		defer os.RemoveAll(submission.CompiledState)
+	}
+
+	if viper.GetBool("debug") {
+		fmt.Printf("Sandbox  dir: %s\n", submission.sandboxDir)
+		fmt.Printf("compiled dir: %s\n", submission.CompiledState)
+	}
+
 	initFolderWithoutTest(submission)
 	checkReq(submission)
 
 	compile(submission)
-	fmt.Println("compile successful")
 	backupCompiled(submission)
 
 	submResult := &SubmissionResult{
@@ -152,22 +196,18 @@ func RunSubmission(submission *Submission) *SubmissionResult {
 	}
 
 	for _, groupResult := range submResult.TestGroupResults {
-		//fmt.Println(" - - - - - - - testgroup: " + groupResult.Name + " - - - - - - - - -")
 		restoreCompiled(submission)
-		//fmt.Println("restore compile success")
 		prepareTestGroup(submission, groupResult.Name)
-		//fmt.Println("prepare test group success")
+		submission.currentGroup = groupResult.Name // for logging
 		groupResult.TestCount = testCount(submission)
 		for i := 1; i <= groupResult.TestCount; i++ {
-			//fmt.Println(" - - - testgroup[" + groupResult.Name + "] test" + strconv.Itoa(i) + " - - -")
 			testResult := runTestCase(submission, i)
-			//util.PrintStruct(testResult)
 			groupResult.TestResults = append(groupResult.TestResults, testResult)
 		}
 		fmt.Println(groupResult.String())
-		//time.Sleep(5 * time.Second)
-
 	}
+
+	submission.createZipResult()
 
 	return submResult
 
