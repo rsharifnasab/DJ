@@ -60,3 +60,27 @@ func WalkDir(dir string) ([]string, error) {
 	}
 	return list, nil
 }
+func ListDir(dir string) ([]string, error) {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]string, 0, len(files))
+	for _, fileInfo := range files {
+		res = append(res, fileInfo.Name())
+	}
+
+	return res, nil
+}
+
+func AutoCd(dir string) string {
+	if !IsDirExists(dir) {
+		return dir
+	} else if listDir, err := ListDir(dir); err != nil {
+		return dir
+	} else if len(listDir) == 1 {
+		return AutoCd(dir + "/" + listDir[0])
+	} else {
+		return dir
+	}
+}

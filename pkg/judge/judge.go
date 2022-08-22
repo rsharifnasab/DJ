@@ -13,8 +13,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var logger util.Logger
-
 func checkReq(submission *Submission) {
 	stdout, err := run.JustOut(submission.sandboxDir + "/req.sh")
 	cobra.CheckErr(err)
@@ -27,6 +25,7 @@ func runTestCase(submission *Submission, i int) (result *TestResult) {
 
 	command := fmt.Sprintf("%s/run.sh test %s %d", submission.sandboxDir, submission.Language, i)
 	stdout, stderr, err := run.DefaultRun(command)
+	//stdout, stderr, err := run.Run(command, 10*1024*1024, 1024*1024*1024, 4*time.Second)
 
 	// TODO: write stderr to file
 	submission.logger.LogTo(submission.currentGroup, strconv.Itoa(i), stderr)
@@ -151,13 +150,30 @@ func (submission *Submission) initLogger() {
 	submission.Result = submission.logger.BasePath
 }
 
-func (submission *Submission) createZipResult() {
-	util.ZipDir(submission.Result+"/submission.zip",
-		submission.Solution,
+func (submission *Submission) createZipResult(result *SubmissionResult) {
+	util.CopyDir(submission.Solution, submission.Result+"/solution")
+	result.DumpTo(submission.Result + "/result.txt")
+
+	util.ZipDir(
+		submission.Result+"/submission.zip",
+		submission.Result,
 	)
 }
 
 func (submission *Submission) initFields() {
+	if ok, err := util.IsZip(submission.UserSolution); err != nil {
+		cobra.CheckErr(err)
+	} else if ok {
+		submission.Solution = util.MakeTempfolder()
+		util.Unzip(submission.UserSolution, submission.Solution)
+		if viper.GetBool("debug") {
+			fmt.Printf("unzipped to submission.Solution: %s\n", submission.Solution)
+		}
+	} else {
+		submission.Solution = submission.UserSolution
+	}
+	submission.Solution = util.AutoCd(submission.Solution)
+
 	if submission.Language == "" {
 		if lang, err := util.AutoDetectLanguage(submission.Solution); err != nil {
 			submission.Language = "generic"
@@ -168,8 +184,8 @@ func (submission *Submission) initFields() {
 }
 
 func (submission *Submission) Run() *SubmissionResult {
-	submission.initFields()
 	submission.initLogger()
+	submission.initFields()
 	fmt.Printf("result dir: %v\n", submission.Result)
 
 	submission.sandboxDir = util.MakeTempfolder()
@@ -204,10 +220,13 @@ func (submission *Submission) Run() *SubmissionResult {
 			testResult := runTestCase(submission, i)
 			groupResult.TestResults = append(groupResult.TestResults, testResult)
 		}
-		fmt.Println(groupResult.String())
+		if viper.GetBool("debug") {
+			fmt.Println(groupResult.String())
+		}
+		submission.logger.LogTo(submission.currentGroup, "score", groupResult.String())
 	}
 
-	submission.createZipResult()
+	submission.createZipResult(submResult)
 
 	return submResult
 

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"io/fs"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
-	"path/filepath"
 
-	"github.com/shirou/gopsutil/v3/process"
 	"github.com/kballard/go-shellquote"
+	"github.com/shirou/gopsutil/v3/process"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -103,7 +103,6 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel() // cleanup resources eventually
-
 
 	// Create the command with our context
 	execCmd := exec.CommandContext(ctx, commandWords[0], commandWords[1:]...)

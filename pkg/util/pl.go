@@ -10,6 +10,9 @@ func AutoDetectLanguage(srcDir string) (string, error) {
 	var extCount map[string]int = make(map[string]int)
 
 	list, err := WalkDir(srcDir)
+	if err != nil {
+		return "", err
+	}
 	for _, path := range list {
 		extension := filepath.Ext(path)
 		prev, prs := extCount[extension]
@@ -20,17 +23,21 @@ func AutoDetectLanguage(srcDir string) (string, error) {
 		}
 	}
 
-	delete(extCount, "txt")
-	delete(extCount, "log")
-	delete(extCount, "in")
-	delete(extCount, "out")
+	delete(extCount, ".txt")
+	delete(extCount, ".log")
+	delete(extCount, ".in")
+	delete(extCount, ".out")
 
 	var mostFrequentExtension string = ""
 	var maxFreq = 0
 	for ext, count := range extCount {
 		if count > maxFreq {
 			mostFrequentExtension = ext
+			maxFreq = count
 		}
+	}
+	if maxFreq == 0 {
+		return "", fmt.Errorf("no valid file in src dir %s", srcDir)
 	}
 
 	lang, err := ExtensionToLanguge(mostFrequentExtension)

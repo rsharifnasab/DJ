@@ -19,8 +19,8 @@ compare() {
     local EXPECTED_FILE="$2"
     local actual
     local expected
-    actual=$(sed 's/[[:space:]]/ /g' <"$ACTUAL_FILE")
-    expected=$(sed 's/[[:space:]]/ /g' <"$EXPECTED_FILE")
+    actual=$(   (sed 's/[[:space:]]/ /g' | tr -d '\n' ) <"$ACTUAL_FILE")
+    expected=$( (sed 's/[[:space:]]/ /g' | tr -d '\n' ) <"$EXPECTED_FILE")
     if [[ "$actual" == "$expected" ]]; then
         printf "pass"
     else
@@ -111,7 +111,7 @@ clean() {
 run_code() {
     src_file="$1"
     compiled_file="$2"
-    "./lang/${LANG}.sh" run "$src_file" "$compiled_file"
+    timeout 10s "./lang/${LANG}.sh" run "$src_file" "$compiled_file"
 }
 
 compile_code() {

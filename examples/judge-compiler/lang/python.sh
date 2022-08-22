@@ -11,7 +11,10 @@ if [[ "$COMMAND" == "compile" ]]; then
 elif [[ "$COMMAND" == "run" ]]; then
     src_file="$2"
     compiled_file="$3"
-    python3 src/main.py -i "$src_file" -o "$compiled_file"
+    (
+        cd src
+        python3 main.py -i "../${src_file}" -o "../${compiled_file}"
+    )
 else
     echo "error in python lang"
 fi

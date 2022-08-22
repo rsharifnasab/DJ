@@ -32,7 +32,7 @@ func init() {
 
 	// Persistent Flags which will work for this command and all subcommands
 	studentCmd.PersistentFlags().StringVarP(
-		&submission.Solution, "solution", "s",
+		&submission.UserSolution, "solution", "s",
 		"", "Root of your solution directory")
 	err = studentCmd.MarkPersistentFlagRequired("solution")
 	cobra.CheckErr(err)

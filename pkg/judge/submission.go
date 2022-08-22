@@ -3,12 +3,14 @@ package judge
 import (
 	"fmt"
 	"math"
+	"os"
 	"strings"
 
 	"github.com/rsharifnasab/DJ/pkg/util"
 )
 
 type Submission struct {
+	UserSolution  string
 	Solution      string
 	Judger        string
 	Question      string
@@ -82,14 +84,20 @@ func (gr *TestGroupResult) Score() int {
 
 func (gr *TestGroupResult) String() string {
 	builder := strings.Builder{}
-	builder.WriteString("[")
+	builder.WriteString(
+		fmt.Sprintf("testgroup [%s]: (%d/%d) - %d%%  [\n",
+			gr.Name,
+			gr.PassedCount(),
+			gr.AllCount(),
+			gr.Score(),
+		),
+	)
 	for i, e := range gr.TestResults {
 		str := fmt.Sprintf("   test %d: %s\n", i+1, e.String())
 		builder.WriteString(str)
 	}
 
-	str := fmt.Sprintf("] testgroup [%s]: (%d/%d) - %d%%", gr.Name, gr.PassedCount(), gr.AllCount(), gr.Score())
-	builder.WriteString(str)
+	builder.WriteString("]")
 
 	return builder.String()
 }
@@ -108,4 +116,10 @@ func (sr *SubmissionResult) String() string {
 	}
 	builder.WriteString("]")
 	return builder.String()
+}
+
+func (sr *SubmissionResult) DumpTo(file string) error {
+	str := sr.String()
+	err := os.WriteFile(file, []byte(str), 0666)
+	return err
 }
