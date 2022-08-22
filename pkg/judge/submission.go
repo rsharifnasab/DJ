@@ -79,6 +79,9 @@ func (gr *TestGroupResult) AllCount() int {
 }
 
 func (gr *TestGroupResult) Score() int {
+	if gr.AllCount() == 0 {
+		return 0
+	}
 	return int(math.Ceil(100 * float64(gr.PassedCount()) / float64(gr.AllCount())))
 }
 
