@@ -1,6 +1,0 @@
-
-int g;
-
-int main() {
-
-}
