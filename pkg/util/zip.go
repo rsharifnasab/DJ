@@ -9,18 +9,6 @@ import (
 	"strings"
 )
 
-func ZipDirNaive(filename string, dirs []string) error {
-	list := make([]string, 0)
-	for _, dir := range dirs {
-		dirList, err := WalkDir(dir)
-		if err != nil {
-			return err
-		}
-		list = append(list, dirList...)
-	}
-	return ZipFiles(filename, list)
-}
-
 func ZipDir(filename string, dir string) error {
 	var err error
 

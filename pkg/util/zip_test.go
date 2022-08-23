@@ -55,3 +55,16 @@ func TestUnzip(t *testing.T) {
 	assert.FileExists(t, unzipped+"/example.txt")
 	assert.FileExists(t, unzipped+"/data.txt")
 }
+
+func TestISZip(t *testing.T) {
+	files, dir := prepareSomeFiles()
+	output := dir + "/done.zip"
+	err := ZipFiles(output, files)
+	assert.NoError(t, err)
+
+	assert.FileExists(t, output)
+	res, err := IsZip(output)
+	assert.NoError(t, err)
+	assert.True(t, res)
+	defer os.RemoveAll(output)
+}

@@ -55,5 +55,49 @@ func TestWalk(t *testing.T) {
 	assert.NoError(t, err)
 
 	list, err := WalkDir(tmp)
+	assert.NoError(t, err)
+	assert.Len(t, list, 4)
+}
+
+func TestListDir(t *testing.T) {
+	var err error
+
+	tmp := MakeTempfolder()
+	defer os.RemoveAll(tmp)
+	err = os.MkdirAll(tmp+"/dir-a", 0777)
+	assert.NoError(t, err)
+	err = os.MkdirAll(tmp+"/dir-b", 0777)
+	assert.NoError(t, err)
+	err = os.WriteFile(tmp+"/file-a.txt", []byte("dummy text to write"), 0666)
+	assert.NoError(t, err)
+	err = os.WriteFile(tmp+"/file-b.txt", []byte("dummy text to write"), 0666)
+	assert.NoError(t, err)
+
+	list, err := ListDir(tmp)
+	assert.NoError(t, err)
+	assert.Len(t, list, 4)
+}
+
+func TestCopyDir(t *testing.T) {
+	var err error
+
+	src := MakeTempfolder()
+	defer os.RemoveAll(src)
+	err = os.MkdirAll(src+"/a/b/c/d", 0777)
+	assert.NoError(t, err)
+	err = os.WriteFile(src+"/r1.txt", []byte("dummy text to write"), 0666)
+	assert.NoError(t, err)
+	err = os.WriteFile(src+"/a/a1.txt", []byte("dummy text to write"), 0666)
+	assert.NoError(t, err)
+	err = os.WriteFile(src+"/a/a2.txt", []byte("dummy text to write"), 0666)
+	assert.NoError(t, err)
+	err = os.WriteFile(src+"/a/b/c/d/d1.txt", []byte("dummy text to write"), 0666)
+	assert.NoError(t, err)
+
+	dest := MakeTempfolder()
+	CopyDir(src, dest)
+
+	list, err := WalkDir(dest)
+	assert.NoError(t, err)
 	assert.Len(t, list, 4)
 }
