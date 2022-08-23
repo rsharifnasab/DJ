@@ -3,12 +3,11 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/rsharifnasab/DJ/pkg/ta"
 	"github.com/spf13/cobra"
 )
 
 var (
-	taSubmission ta.TaSubmission
+// taSubmission ta.TaSubmission
 )
 
 // taCmd represents the ta command
@@ -39,28 +38,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// taCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
-	var err error
-
-	// Persistent Flags which will work for this command and all subcommands
-	taCmd.PersistentFlags().StringVarP(
-		&submission.Solution, "solution", "s",
-		"", "Root of your solution directory")
-	err = taCmd.MarkPersistentFlagRequired("solution")
-	cobra.CheckErr(err)
-	err = taCmd.MarkPersistentFlagDirname("solution")
-	cobra.CheckErr(err)
-
-	taCmd.PersistentFlags().StringVarP(
-		&submission.Judger, "judger", "j",
-		"", "The judger suitable for your submission")
-	err = taCmd.MarkPersistentFlagRequired("judger")
-	cobra.CheckErr(err)
-
-	taCmd.PersistentFlags().StringVarP(
-		&submission.Question, "question", "q",
-		"", "the question path that you are answering to")
-	err = taCmd.MarkPersistentFlagRequired("question")
-	cobra.CheckErr(err)
 
 }

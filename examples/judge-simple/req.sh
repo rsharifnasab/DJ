@@ -4,4 +4,4 @@ set -e
 set -o pipefail
 set -u
 
-echo "bash javac java python3 spim"
+echo "bash javac java python3 gcc g++"

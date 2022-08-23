@@ -79,7 +79,11 @@ func AutoCd(dir string) string {
 	} else if listDir, err := ListDir(dir); err != nil {
 		return dir
 	} else if len(listDir) == 1 {
-		return AutoCd(dir + "/" + listDir[0])
+		if IsDirExists(listDir[0]) {
+			return AutoCd(dir + "/" + listDir[0])
+		} else {
+			return dir // handle single file upload
+		}
 	} else {
 		return dir
 	}

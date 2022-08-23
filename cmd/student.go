@@ -10,8 +10,26 @@ import (
 )
 
 var (
-	submission judge.Submission
+	submission StudentSubmissionDTO
 )
+
+type StudentSubmissionDTO struct {
+	Judge        string
+	Question     string
+	Language     string
+	UserSolution string
+	ResultDir    string
+}
+
+func (dto *StudentSubmissionDTO) toSubmission() *judge.Submission {
+	return judge.NewSubmission(
+		dto.Judge,
+		dto.Question,
+		dto.Language,
+		dto.UserSolution,
+		dto.ResultDir,
+	)
+}
 
 // studentCmd represents the student command
 var studentCmd = &cobra.Command{
@@ -22,7 +40,7 @@ and usage of using your command. For example:
 
 students can run and test thier codes via this command`,
 	Run: func(cmd *cobra.Command, args []string) {
-		student.Run(&submission)
+		student.Run(submission.toSubmission())
 	},
 }
 
@@ -40,7 +58,7 @@ func init() {
 	cobra.CheckErr(err)
 
 	studentCmd.PersistentFlags().StringVarP(
-		&submission.Judger, "judger", "j",
+		&submission.Judge, "judger", "j",
 		"", "The judger suitable for your submission")
 	err = studentCmd.MarkPersistentFlagRequired("judger")
 	cobra.CheckErr(err)
@@ -52,7 +70,7 @@ func init() {
 	cobra.CheckErr(err)
 
 	studentCmd.PersistentFlags().StringVarP(
-		&submission.Result, "result", "r",
+		&submission.ResultDir, "result", "r",
 		"", "where to save result and logs")
 
 	studentCmd.PersistentFlags().StringVarP(

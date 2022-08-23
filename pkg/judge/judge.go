@@ -3,6 +3,7 @@ package judge
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -13,7 +14,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-func checkReq(submission *Submission) {
+func (submission *Submission) checkReq() {
+	if viper.GetBool("debug") {
+		abs, err := filepath.Abs(submission.sandboxDir)
+		if err != nil {
+			panic(err)
+		} else {
+			fmt.Printf("sandbox dir: %v\n", abs)
+		}
+	}
 	stdout, err := run.JustOut(submission.sandboxDir + "/req.sh")
 	cobra.CheckErr(err)
 	space := regexp.MustCompile(`\s+`)
@@ -56,9 +65,10 @@ func runTestCase(submission *Submission, i int) (result *TestResult) {
 			return
 		}
 	} else {
-		//fmt.Println("no error")
+		if viper.GetBool("debug") {
+			fmt.Println("no error")
+		}
 	}
-	//TODO: better handling
 	var n int
 	var resultStr string
 	_, err = fmt.Sscanf(stdout, "test[%d] - %s\n", &n, &resultStr)
@@ -81,9 +91,10 @@ func runTestCase(submission *Submission, i int) (result *TestResult) {
 
 }
 
-func testCount(submission *Submission) int {
+func (submission *Submission) currentGroupTestCount() int {
 	command := fmt.Sprintf("%s/run.sh count %s",
 		submission.sandboxDir, submission.Language)
+	println(command)
 	stdout, err := run.JustOut(command)
 	cobra.CheckErr(err)
 	n, err := strconv.Atoi(strings.TrimSpace(stdout))
@@ -91,7 +102,7 @@ func testCount(submission *Submission) int {
 	return n
 }
 
-func compile(submission *Submission) {
+func (submission *Submission) compile() {
 	command := fmt.Sprintf("%s/run.sh compile %s",
 		submission.sandboxDir, submission.Language)
 
@@ -105,22 +116,22 @@ func compile(submission *Submission) {
 	}
 }
 
-func initFolderWithoutTest(submission *Submission) {
-	util.CopyDir(submission.Judger, submission.sandboxDir)
-	util.CopyDir(submission.Solution, submission.sandboxDir+"/src")
+func (submission *Submission) initSandboxWithoutTest() {
+	util.CopyDir(submission.Judge, submission.sandboxDir)
+	util.CopyDir(submission.solution, submission.sandboxDir+"/src/")
 }
 
-func backupCompiled(submission *Submission) {
+func (submission *Submission) backupCompiled() {
 	util.CopyDir(submission.sandboxDir, submission.CompiledState)
 }
 
-func restoreCompiled(submission *Submission) {
+func (submission *Submission) restoreCompiled() {
 	err := os.RemoveAll(submission.sandboxDir)
 	cobra.CheckErr(err)
 	util.CopyDir(submission.CompiledState, submission.sandboxDir)
 }
 
-func exploreTestGroups(submission *Submission) []*TestGroupResult {
+func (submission *Submission) exploreTestGroups() []*TestGroupResult {
 	res := make([]*TestGroupResult, 0, 10)
 
 	files, err := os.ReadDir(submission.Question)
@@ -135,99 +146,68 @@ func exploreTestGroups(submission *Submission) []*TestGroupResult {
 	return res
 }
 
-func prepareTestGroup(submission *Submission, groupName string) {
-	src := fmt.Sprintf("%s/%s", submission.Question, groupName)
+func (submission *Submission) prepareForTestGroup(group *TestGroupResult) {
+	src := fmt.Sprintf("%s/%s", submission.Question, group.Name)
 	dest := fmt.Sprintf("%s/testgroup", submission.sandboxDir)
 	util.CopyDir(src, dest)
+	submission.currentGroup = group.Name // for logging
 }
 
-func (submission *Submission) initLogger() {
-	if submission.Result == "" {
-		// reminder: we don't want to remove the result folder!
-		submission.Result = util.MakeTempfolder()
-	}
-	submission.logger = util.NewLogger(submission.Result)
-	submission.Result = submission.logger.BasePath
-}
-
-func (submission *Submission) createZipResult(result *SubmissionResult) {
-	util.CopyDir(submission.Solution, submission.Result+"/solution")
-	result.DumpTo(submission.Result + "/result.txt")
+func (submission *Submission) createZipResult() {
+	util.CopyDir(submission.solution, submission.ResultDir+"/solution")
+	submission.Result.DumpTo(submission.ResultDir + "/result.txt")
 
 	util.ZipDir(
-		submission.Result+"/submission.zip",
-		submission.Result,
+		submission.ResultDir+"/submission.zip",
+		submission.ResultDir,
 	)
 }
 
-func (submission *Submission) initFields() {
-	if ok, err := util.IsZip(submission.UserSolution); err != nil {
-		cobra.CheckErr(err)
-	} else if ok {
-		submission.Solution = util.MakeTempfolder()
-		util.Unzip(submission.UserSolution, submission.Solution)
-		if viper.GetBool("debug") {
-			fmt.Printf("unzipped to submission.Solution: %s\n", submission.Solution)
-		}
-	} else {
-		submission.Solution = submission.UserSolution
-	}
-	submission.Solution = util.AutoCd(submission.Solution)
-
-	if submission.Language == "" {
-		if lang, err := util.AutoDetectLanguage(submission.Solution); err != nil {
-			submission.Language = "generic"
-		} else {
-			submission.Language = lang
-		}
-	}
-}
-
-func (submission *Submission) Run() *SubmissionResult {
-	submission.initLogger()
-	submission.initFields()
-	fmt.Printf("result dir: %v\n", submission.Result)
-
-	submission.sandboxDir = util.MakeTempfolder()
-	submission.CompiledState = util.MakeTempfolder()
-	if !viper.GetBool("debug") {
-		defer os.RemoveAll(submission.sandboxDir)
-		defer os.RemoveAll(submission.CompiledState)
-	}
-
+func (submission *Submission) PrintInitialInfo() {
+	fmt.Printf("result dir: %v\n", submission.ResultDir)
 	if viper.GetBool("debug") {
 		fmt.Printf("Sandbox  dir: %s\n", submission.sandboxDir)
 		fmt.Printf("compiled dir: %s\n", submission.CompiledState)
+	} else {
+		defer os.RemoveAll(submission.sandboxDir)
+		defer os.RemoveAll(submission.CompiledState)
+	}
+}
+
+func (submission *Submission) RunGroup(groupResult *TestGroupResult) {
+	submission.restoreCompiled()
+	submission.prepareForTestGroup(groupResult)
+
+	groupResult.TestCount = submission.currentGroupTestCount()
+	for i := 1; i <= groupResult.TestCount; i++ {
+		singleTestResult := runTestCase(submission, i)
+		groupResult.TestResults = append(groupResult.TestResults, singleTestResult)
 	}
 
-	initFolderWithoutTest(submission)
-	checkReq(submission)
+	if viper.GetBool("debug") {
+		fmt.Println(groupResult.String())
+	}
+	submission.logger.LogTo(submission.currentGroup, "score", groupResult.String())
+}
 
-	compile(submission)
-	backupCompiled(submission)
+func (submission *Submission) RunSuite() *SubmissionResult {
+	submission.PrintInitialInfo()
 
-	submResult := &SubmissionResult{
+	submission.initSandboxWithoutTest()
+	submission.checkReq()
+	submission.compile()
+	submission.backupCompiled()
+
+	submission.Result = &SubmissionResult{
 		Submission:       submission,
-		TestGroupResults: exploreTestGroups(submission),
+		TestGroupResults: submission.exploreTestGroups(),
 	}
 
-	for _, groupResult := range submResult.TestGroupResults {
-		restoreCompiled(submission)
-		prepareTestGroup(submission, groupResult.Name)
-		submission.currentGroup = groupResult.Name // for logging
-		groupResult.TestCount = testCount(submission)
-		for i := 1; i <= groupResult.TestCount; i++ {
-			testResult := runTestCase(submission, i)
-			groupResult.TestResults = append(groupResult.TestResults, testResult)
-		}
-		if viper.GetBool("debug") {
-			fmt.Println(groupResult.String())
-		}
-		submission.logger.LogTo(submission.currentGroup, "score", groupResult.String())
+	for _, groupResult := range submission.Result.TestGroupResults {
+		submission.RunGroup(groupResult)
 	}
 
-	submission.createZipResult(submResult)
+	submission.createZipResult()
 
-	return submResult
-
+	return submission.Result
 }

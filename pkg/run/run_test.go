@@ -9,7 +9,7 @@ import (
 )
 
 func TestOutput(t *testing.T) {
-	out, _, err := Run(`bash -c 'echo "hello world"'`, 5*1024, 50*1024*1024, 100*time.Millisecond)
+	out, _, err := DefaultRun(`bash -c 'echo "hello world"'`)
 	assert.NoError(t, err)
 	assert.Equal(t, "hello world\n", out)
 }
@@ -17,14 +17,14 @@ func TestOutput(t *testing.T) {
 // TODO: refactor run with justTun, so there are no extra args
 
 func TestStderr(t *testing.T) {
-	stdout, stderr, err := Run(`bash -c '1>&2 echo "hello err"; echo "hello out"'`, 5*1024, 50*1024*1024, 100*time.Millisecond)
+	stdout, stderr, err := DefaultRun(`bash -c '1>&2 echo "hello err"; echo "hello out"'`)
 	assert.NoError(t, err)
 	assert.Equal(t, "hello err\n", stderr)
 	assert.Equal(t, "hello out\n", stdout)
 }
 
 func TestMalformedQoute(t *testing.T) {
-	_, _, err := Run(`bash -c 'echo "hello world"`, 5*1024, 50*1024*1024, 100*time.Millisecond)
+	_, _, err := DefaultRun(`bash -c 'echo "hello world"`)
 	assert.EqualValues(t, MalformedCommandError, err)
 }
 
@@ -46,18 +46,17 @@ func TestOutputLimit(t *testing.T) {
 }
 
 func TestNoOutput(t *testing.T) {
-	_, _, err := Run(`bash -c 'true'`, 5*1024, 50*1024*1024, 100*time.Millisecond)
+	_, _, err := DefaultRun(`bash -c 'true'`)
 	assert.EqualValues(t, NoOutputError, err)
 }
 
 func TestNonZero(t *testing.T) {
-	_, _, err := Run(`bash -c 'false'`, 5*1024, 50*1024*1024, 100*time.Millisecond)
+	_, _, err := DefaultRun(`bash -c 'false'`)
 	assert.EqualValues(t, NonZeroExitError, err)
 }
 
 func TestNonExistingPath(t *testing.T) {
-	_, _, err := Run(`./non_existing_file`,
-		5*1024, 50*1024*1024, 100*time.Millisecond)
+	_, _, err := DefaultRun(`./non_existing_file`)
 	assert.EqualValues(t, NotValidExecutableError, err)
 }
 
@@ -72,16 +71,14 @@ echo "hello world"
 	_, err = file.Write([]byte(content))
 	assert.NoError(t, err)
 
-	_, _, err = Run(file.Name(),
-		5*1024, 50*1024*1024, 100*time.Millisecond)
+	_, _, err = DefaultRun(file.Name())
 	assert.EqualValues(t, NotValidExecutableError, err)
 }
 
 func TestExecutable(t *testing.T) {
-
 	file, err := os.CreateTemp("", "script*.sh")
 	assert.NoError(t, err)
-	//defer os.Remove(file.Name())
+	defer os.Remove(file.Name())
 
 	content := `#!/usr/bin/env bash
 echo "hello world"
@@ -97,4 +94,26 @@ echo "hello world"
 		5*1024, 50*1024*1024, 100*time.Millisecond)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "hello world\n", stdout)
+}
+
+func TestChild(t *testing.T) {
+	file, err := os.CreateTemp("", "script*.sh")
+	assert.NoError(t, err)
+	defer os.Remove(file.Name())
+
+	content := `#!/usr/bin/env bash	
+(sleep 0.2; echo "done") &
+sleep 0.5
+`
+	_, err = file.Write([]byte(content))
+	assert.NoError(t, err)
+
+	file.Chmod(0777)
+	err = file.Close()
+	assert.NoError(t, err)
+
+	stdout, _, err := Run(file.Name(),
+		5*1024, 50*1024*1024, 1000*time.Millisecond)
+	assert.NoError(t, err)
+	assert.EqualValues(t, "done\n", stdout)
 }

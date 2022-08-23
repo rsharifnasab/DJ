@@ -45,7 +45,7 @@ func TestWalk(t *testing.T) {
 	assert.NoError(t, err)
 
 	err = os.WriteFile(tmp+"/r1.txt", []byte("dummy text to write"), 0666)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	err = os.WriteFile(tmp+"/a/a1.txt", []byte("dummy text to write"), 0666)
 	assert.NoError(t, err)

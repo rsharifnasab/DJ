@@ -7,19 +7,73 @@ import (
 	"strings"
 
 	"github.com/rsharifnasab/DJ/pkg/util"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type Submission struct {
-	UserSolution  string
-	Solution      string
-	Judger        string
-	Question      string
-	Language      string
+	Judge        string
+	Question     string
+	Language     string
+	UserSolution string
+	ResultDir    string
+
+	solution      string
 	sandboxDir    string
 	CompiledState string
-	Result        string
 	currentGroup  string
 	logger        *util.Logger
+
+	Result *SubmissionResult
+}
+
+func (submission *Submission) initFields() {
+	if ok, err := util.IsZip(submission.UserSolution); err != nil {
+		cobra.CheckErr(err)
+	} else if ok {
+		submission.solution = util.MakeTempfolder()
+		util.Unzip(submission.UserSolution, submission.solution)
+		if viper.GetBool("debug") {
+			fmt.Printf("unzipped to submission.Solution: %s\n", submission.solution)
+		}
+	} else {
+		submission.solution = submission.UserSolution
+	}
+	submission.solution = util.AutoCd(submission.solution)
+
+	if submission.Language == "" {
+		if lang, err := util.AutoDetectLanguage(submission.solution); err != nil {
+			submission.Language = "generic"
+		} else {
+			submission.Language = lang
+		}
+	}
+
+	submission.sandboxDir = util.MakeTempfolder()
+	submission.CompiledState = util.MakeTempfolder()
+}
+
+func (submission *Submission) initLogger() {
+	if submission.ResultDir == "" {
+		// reminder: we don't want to remove the result folder!
+		submission.ResultDir = util.MakeTempfolder()
+	}
+	submission.logger = util.NewLogger(submission.ResultDir)
+	submission.ResultDir = submission.logger.BasePath
+}
+
+func NewSubmission(judge, question, language, userSolution, resultDir string) *Submission {
+	s := &Submission{
+		Judge:        judge,
+		Question:     question,
+		Language:     language,
+		UserSolution: userSolution,
+		ResultDir:    resultDir,
+	}
+	s.initFields()
+	s.initLogger()
+
+	return s
 }
 
 type TestResult struct {
