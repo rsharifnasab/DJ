@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var examplePath string = "../../examples"
+var examplePath = "../../examples"
 
 func createSubmission(lang string) *Submission {
 	return NewSubmission(

@@ -7,7 +7,7 @@ import (
 )
 
 func AutoDetectLanguage(srcDir string) (string, error) {
-	var extCount map[string]int = make(map[string]int)
+	var extCount = make(map[string]int)
 
 	list, err := WalkDir(srcDir)
 	if err != nil {
@@ -28,7 +28,7 @@ func AutoDetectLanguage(srcDir string) (string, error) {
 	delete(extCount, ".in")
 	delete(extCount, ".out")
 
-	var mostFrequentExtension string = ""
+	var mostFrequentExtension string
 	var maxFreq = 0
 	for ext, count := range extCount {
 		if count > maxFreq {
@@ -52,9 +52,9 @@ func ExtensionToLanguge(ext string) (lang string, err error) {
 	lang, prs := extensionToPLName[ext]
 	if !prs {
 		return "", fmt.Errorf("%s is not a valid extension", ext)
-	} else {
-		return strings.ToLower(lang), nil
 	}
+	return strings.ToLower(lang), nil
+
 }
 
 var extensionToPLName = map[string]string{

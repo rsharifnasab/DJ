@@ -90,22 +90,22 @@ type TestResult struct {
 func (testResult *TestResult) isPassed() bool {
 	return testResult.Pass
 }
-func (r *TestResult) String() string {
-	if !r.Run {
+func (testResult *TestResult) String() string {
+	if !testResult.Run {
 		return "not ran yet"
-	} else if r.Pass {
+	} else if testResult.Pass {
 		return "passed"
-	} else if r.Killed {
+	} else if testResult.Killed {
 		return "killed"
-	} else if r.TimedOut {
+	} else if testResult.TimedOut {
 		return "timed out"
-	} else if r.NoResult {
+	} else if testResult.NoResult {
 		return "printed nothing"
-	} else if r.NonZero {
+	} else if testResult.NonZero {
 		return "exited with exit-code != 0"
-	} else if r.MalformedOutput {
+	} else if testResult.MalformedOutput {
 		return "malformed output"
-	} else if r.Wrong {
+	} else if testResult.Wrong {
 		return "wrong answer"
 	} else {
 		panic("malformed testResult")

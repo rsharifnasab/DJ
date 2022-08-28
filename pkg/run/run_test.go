@@ -25,39 +25,39 @@ func TestStderr(t *testing.T) {
 
 func TestMalformedQoute(t *testing.T) {
 	_, _, err := DefaultRun(`bash -c 'echo "hello world"`)
-	assert.EqualValues(t, MalformedCommandError, err)
+	assert.EqualValues(t, ErrMalformedCommand, err)
 }
 
 func TestTimeLimit(t *testing.T) {
 	_, _, err := Run(`bash -c 'while true; do true; done'`, 5*1024, 50*1024*1024, 100*time.Millisecond)
-	assert.EqualValues(t, TimedOutError, err)
+	assert.EqualValues(t, ErrTimedOut, err)
 }
 
 func TestMemoryLimit(t *testing.T) {
 	_, _, err := Run(`bash -c 'echo "ok"; cat /dev/zero | head -c 500m > /dev/null'`, 5*1024, 50*1024, 10*time.Second)
-	assert.EqualValues(t, MemoryLimitError, err)
+	assert.EqualValues(t, ErrMemoryLimit, err)
 }
 
 func TestOutputLimit(t *testing.T) {
 	_, _, err := Run(`bash -c 'while true; do echo "text text text"; done'`, 100, 50*1024*1024, 5*time.Second)
 	assert.Error(t, err)
-	assert.Contains(t, []error{OutputLimitError, NonZeroExitError, TimedOutError}, err)
+	assert.Contains(t, []error{ErrOutputLimit, ErrNonZeroExit, ErrTimedOut}, err)
 	// why non-zero? wht time limit on windows?
 }
 
 func TestNoOutput(t *testing.T) {
 	_, _, err := DefaultRun(`bash -c 'true'`)
-	assert.EqualValues(t, NoOutputError, err)
+	assert.EqualValues(t, ErrNoOutput, err)
 }
 
 func TestNonZero(t *testing.T) {
 	_, _, err := DefaultRun(`bash -c 'false'`)
-	assert.EqualValues(t, NonZeroExitError, err)
+	assert.EqualValues(t, ErrNonZeroExit, err)
 }
 
 func TestNonExistingPath(t *testing.T) {
 	_, _, err := DefaultRun(`./non_existing_file`)
-	assert.EqualValues(t, NotValidExecutableError, err)
+	assert.EqualValues(t, ErrNotValidExecutable, err)
 }
 
 func TestNonExecutable(t *testing.T) {
@@ -72,7 +72,7 @@ echo "hello world"
 	assert.NoError(t, err)
 
 	_, _, err = DefaultRun(file.Name())
-	assert.EqualValues(t, NotValidExecutableError, err)
+	assert.EqualValues(t, ErrNotValidExecutable, err)
 }
 
 func TestExecutable(t *testing.T) {

@@ -1,0 +1,11 @@
+
+c:
+  import-white:
+    - stdio.h
+    - math.h
+  import-black:
+    - strings.h
+  structure:
+    - array
+
+

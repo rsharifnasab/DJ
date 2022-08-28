@@ -81,7 +81,7 @@ func monitorMem(pid int, memLimit uint64, result chan uint64) {
 	}
 }
 
-// run a command with given limits for outbut (bytes), memory limiy (bytes) and duration
+// Run a command with given limits for outbut (bytes), memory limiy (bytes) and duration
 // duration is handling with golang's context so it's almost reliable
 // but output limit and memory limit are handmaiden cross platform solutions
 // known bugs: memory limit monitor routine sometimes experience starvation so it doen'st kill the program on-time
@@ -98,7 +98,7 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	commandUnix := filepath.ToSlash(commandStr)
 	commandWords, err := shellquote.Split(commandUnix)
 	if err != nil {
-		return "", "", MalformedCommandError
+		return "", "", ErrMalformedCommand
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -135,7 +135,7 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 		//   linux        , windows
 		case *fs.PathError, *exec.Error:
 			//fmt.Println(err.Error())
-			return "", "", NotValidExecutableError
+			return "", "", ErrNotValidExecutable
 
 		default:
 			cobra.CheckErr(err)
@@ -148,7 +148,7 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	// fill stdout buffer
 	bytesRead, err := stdoutPipe.Read(outBuf)
 	if bytesRead == outLimit+1 {
-		return "", "", OutputLimitError
+		return "", "", ErrOutputLimit
 	}
 
 	err = stdoutPipe.Close()
@@ -165,14 +165,14 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	executeErr := execCmd.Wait()
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return "", "", TimedOutError
+		return "", "", ErrTimedOut
 	} else if ctx.Err() != nil {
 		panic(err)
 	}
 
 	select {
 	case <-memUsageResult:
-		return "", "", MemoryLimitError
+		return "", "", ErrMemoryLimit
 	default:
 
 	}
@@ -182,11 +182,11 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 
 	if executeErr != nil {
 		fmt.Println(executeErr.Error()) // TODO: handle in a better way
-		return outStr, errStr, NonZeroExitError
+		return outStr, errStr, ErrNonZeroExit
 	}
 
 	if bytesRead == 0 {
-		return outStr, errStr, NoOutputError
+		return outStr, errStr, ErrNoOutput
 	}
 
 	return outStr, errStr, nil

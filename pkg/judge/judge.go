@@ -44,23 +44,23 @@ func runTestCase(submission *Submission, i int) (result *TestResult) {
 	}
 	if err != nil {
 		switch err {
-		case run.MemoryLimitError:
+		case run.ErrMemoryLimit:
 			result.Killed = true
 			return
-		case run.OutputLimitError:
+		case run.ErrOutputLimit:
 			result.Killed = true
 			return
-		case run.MalformedCommandError:
+		case run.ErrMalformedCommand:
 			panic(err)
-		case run.TimedOutError:
+		case run.ErrTimedOut:
 			result.TimedOut = true
 			return
-		case run.NoOutputError:
+		case run.ErrNoOutput:
 			result.NoResult = true
 			return
-		case run.NotValidExecutableError:
+		case run.ErrNotValidExecutable:
 			panic("cannot run test " + strconv.Itoa(i))
-		case run.NonZeroExitError:
+		case run.ErrNonZeroExit:
 			result.NonZero = true
 			return
 		}
@@ -109,7 +109,7 @@ func (submission *Submission) compile() {
 	stdout, stderr, err := run.DefaultRun(command)
 	submission.logger.LogTo("", "compile", stdout)
 	submission.logger.LogTo("", "compile", stderr)
-	if err != nil && err != run.NoOutputError {
+	if err != nil && err != run.ErrNoOutput {
 		cobra.CheckErr(fmt.Errorf("compilation failed:\nerr: %w", err))
 	} else {
 		fmt.Println("Compilation successful")

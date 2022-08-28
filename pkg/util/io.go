@@ -38,10 +38,9 @@ func IsDirExists(dir string) bool {
 	_, err := os.Stat(dir)
 	if errors.Is(err, os.ErrNotExist) {
 		return false
-	} else {
-		cobra.CheckErr(err)
-		return true
 	}
+	cobra.CheckErr(err)
+	return true
 }
 
 func WalkDir(dir string) ([]string, error) {
@@ -81,9 +80,8 @@ func AutoCd(dir string) string {
 	} else if len(listDir) == 1 {
 		if IsDirExists(listDir[0]) {
 			return AutoCd(dir + "/" + listDir[0])
-		} else {
-			return dir // handle single file upload
 		}
+		return dir // handle single file upload
 	} else {
 		return dir
 	}
