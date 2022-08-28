@@ -8,11 +8,10 @@ import (
 	"time"
 
 	"github.com/rsharifnasab/DJ/cmd"
-	"github.com/spf13/viper"
 )
 
 func main() {
-	viper.Set("debug", true)
+	//viper.Set("debug", true)
 	rand.Seed(time.Now().UnixNano())
 	//ts.Tree()
 	cmd.Execute()
