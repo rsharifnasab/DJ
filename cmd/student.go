@@ -58,9 +58,9 @@ func init() {
 	cobra.CheckErr(err)
 
 	studentCmd.PersistentFlags().StringVarP(
-		&submission.Judge, "judger", "j",
-		"", "The judger suitable for your submission")
-	err = studentCmd.MarkPersistentFlagRequired("judger")
+		&submission.Judge, "judge", "j",
+		"", "The judge suitable for your submission")
+	err = studentCmd.MarkPersistentFlagRequired("judge")
 	cobra.CheckErr(err)
 
 	studentCmd.PersistentFlags().StringVarP(
