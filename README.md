@@ -1,5 +1,5 @@
 # DJ
-DJ stands for Distributed Judge. A tool that many TAs whish they would have. This would provide more flexibility over normal judges such as [Quera](https://quera.ir)
+DJ stands for Distributed Judge. A tool that many TAs wish they would have. This would provide more flexibility over normal judges such as [Quera](https://quera.ir)
 
 
 
