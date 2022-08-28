@@ -77,11 +77,11 @@ Exploration on various software and library choices is Documented [here](https:/
 
 #### Do I need this as a student?
 
-No you are not. The course TA should clone this repository and create questions and then distribute questions alongside the judge and the binary for you.
+No you don't. The course TA should clone this repository and create questions and then distribute questions alongside the judge and the binary for you.
 
 #### Should I learn Go before using this project?
 
-No you aren't. The flexible part is not written in Go, but instead you need a bit of bash script to tune judges and develop creative questions.
+No you shouldn't. The flexible part is not written in Go, but instead you need a bit of bash script to tune judges and develop creative questions.
 
 
 
