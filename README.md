@@ -14,10 +14,10 @@ DJ stands for Distributed Judge. A tool that many TAs wish they would have. This
 
 ## Features
 
-- Judge student codes locally
-- Most flexible judge out there
-- Check out source codes against illegal usage of language constructs.
-- Doesn't need server
+- Judges student codes locally
+- The most flexible judge out there
+- Checks out source codes against illegal usage of language constructs.
+- Doesn't need a server
 
 
 ## Acknowledgements
@@ -30,12 +30,20 @@ DJ stands for Distributed Judge. A tool that many TAs wish they would have. This
 
 ## Demo
 
-This is a demo which demonstrate how students can judge their code locally.
+This is a demo which demonstrate how students can judge their codes locally.
 
 [![demo](https://asciinema.org/a/335480.svg)](https://asciinema.org/a/B7EEbzwsnDVGq7pFu012wm5UM?autoplay=1)
 ## Installation
 
-Official way to use this repository is clone the repository and run distribute script
+### Prerequisites
++ `Golang` should be installed on your system
++ Also there is heavy usage of `Bash`
++ For running tests you should have `python3` and `gcc` and `java` in your `PATH`
+
+
+### How to Instal
+
+Official way to use this repository is to clone the repository and run the "Distribute script"
 
 You can also install the binary file like this (which is not recommended because it does not contain examples)
 ```bash
@@ -79,9 +87,9 @@ Exploration on various software and library choices is Documented [here](https:/
 
 No you don't. The course TA should clone this repository and create questions and then distribute questions alongside the judge and the binary for you.
 
-#### Should I learn Go before using this project?
+#### Do I Have to learn Go before using this project?
 
-No you shouldn't. The flexible part is not written in Go, but instead you need a bit of bash script to tune judges and develop creative questions.
+No you don't. The flexible part is not programmed in Go, but instead you need a bit of bash script knowledge to tune judges and develop creative questions.
 
 
 
@@ -104,7 +112,7 @@ Here are some related projects
 
 ## Roadmap
 
-- Better support for Windows
+- Better Windows support
 - Provide learning resources for Bash script
 - Better API for source code checks
 - Save student scores on a Block Chain
