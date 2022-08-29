@@ -24,7 +24,7 @@ DJ stands for Distributed Judge. A tool that many TAs wish they would have. This
 
  - [Dr Mojtaba Vahidi, My Kind Supervisor](http://facultymembers.sbu.ac.ir/vahidi/)
  - [Dr Sadegh Aliakbari, My Referee](http://facultymembers.sbu.ac.ir/aliakbary/)
- - [Amir Arsalan San'ati, Who got me the idea](https://github.com/Amirarsalan-sn)
+ - [Amir Arsalan San'ati, Who gave me the idea](https://github.com/Amirarsalan-sn)
  
 
 
