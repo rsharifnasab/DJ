@@ -94,7 +94,7 @@ func runTestCase(submission *Submission, i int) (result *TestResult) {
 func (submission *Submission) currentGroupTestCount() int {
 	command := fmt.Sprintf("%s/run.sh count %s",
 		submission.sandboxDir, submission.Language)
-	println(command)
+	//println(command)
 	stdout, err := run.JustOut(command)
 	cobra.CheckErr(err)
 	n, err := strconv.Atoi(strings.TrimSpace(stdout))
@@ -137,11 +137,13 @@ func (submission *Submission) exploreTestGroups() []*TestGroupResult {
 	files, err := os.ReadDir(submission.Question)
 	cobra.CheckErr(err)
 	for _, f := range files {
-		testGroup := &TestGroupResult{
-			Name:        f.Name(), // just name
-			TestResults: make([]*TestResult, 0, 10),
+		if f.IsDir() {
+			testGroup := &TestGroupResult{
+				Name:        f.Name(), // just name
+				TestResults: make([]*TestResult, 0, 10),
+			}
+			res = append(res, testGroup)
 		}
-		res = append(res, testGroup)
 	}
 	return res
 }
@@ -177,6 +179,7 @@ func (submission *Submission) PrintInitialInfo() {
 func (submission *Submission) RunGroup(groupResult *TestGroupResult) {
 	submission.restoreCompiled()
 	submission.prepareForTestGroup(groupResult)
+	println("-> " + groupResult.Name)
 
 	groupResult.TestCount = submission.currentGroupTestCount()
 	for i := 1; i <= groupResult.TestCount; i++ {

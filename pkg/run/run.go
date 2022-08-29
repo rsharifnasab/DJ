@@ -146,7 +146,7 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	go monitorMem(pid, memLimit, memUsageResult)
 
 	// fill stdout buffer
-	bytesRead, err := stdoutPipe.Read(outBuf)
+	bytesRead, _ := stdoutPipe.Read(outBuf)
 	if bytesRead == outLimit+1 {
 		return "", "", ErrOutputLimit
 	}
@@ -155,8 +155,9 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	cobra.CheckErr(err)
 
 	// fill stderr buffer
-	stderrN, err := stderrPipe.Read(errBuf)
+	stderrN, _ := stderrPipe.Read(errBuf)
 	_ = stderrN
+
 	err = stderrPipe.Close()
 	cobra.CheckErr(err)
 

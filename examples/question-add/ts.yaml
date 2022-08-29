@@ -1,0 +1,17 @@
+
+c:
+  import-white:
+    - stdio.h
+    - math.h
+  import-black:
+    - strings.h
+  structure:
+    - array
+
+
+java:
+  import-black:
+    # this may not wor
+    - java.net.Socket
+    # but this would work
+    - java.math

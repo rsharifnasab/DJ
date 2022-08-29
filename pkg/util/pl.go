@@ -54,7 +54,31 @@ func ExtensionToLanguge(ext string) (lang string, err error) {
 		return "", fmt.Errorf("%s is not a valid extension", ext)
 	}
 	return strings.ToLower(lang), nil
+}
 
+func AllLangSrcs(dir string, langExpected string) ([]string, error) {
+	var err error
+
+	if langExpected == "" {
+		langExpected, err = AutoDetectLanguage(dir)
+		if err != nil {
+			return nil, err
+		}
+	}
+	rawList, err := ListDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]string, 0)
+	for _, file := range rawList {
+		ext := filepath.Ext(file)
+		if langActual, err := ExtensionToLanguge(ext); err != nil {
+			continue
+		} else if langExpected == langActual {
+			res = append(res, dir+"/"+file)
+		}
+	}
+	return res, nil
 }
 
 var extensionToPLName = map[string]string{
