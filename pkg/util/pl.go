@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -56,14 +57,11 @@ func ExtensionToLanguge(ext string) (lang string, err error) {
 	return strings.ToLower(lang), nil
 }
 
-func AllLangSrcs(dir string, langExpected string) ([]string, error) {
+func FilterSrcsByLang(dir string, langExpected string) ([]string, error) {
 	var err error
 
 	if langExpected == "" {
-		langExpected, err = AutoDetectLanguage(dir)
-		if err != nil {
-			return nil, err
-		}
+		return nil, errors.New("provide language for filter by")
 	}
 	rawList, err := ListDir(dir)
 	if err != nil {

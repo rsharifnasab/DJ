@@ -24,7 +24,6 @@ import (
 	"github.com/smacker/go-tree-sitter/rust"
 	"github.com/smacker/go-tree-sitter/scala"
 	"github.com/smacker/go-tree-sitter/typescript/typescript"
-	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
@@ -71,7 +70,7 @@ func loadConfig(questionDir string) (tsConfig, error) {
 	return conf, nil
 }
 
-// deprecated
+/*
 func executeQuery(queryStr string, tree *sitter.Tree, lang *sitter.Language) []*sitter.Node {
 	query, err := sitter.NewQuery([]byte(queryStr), lang)
 	if err != nil {
@@ -94,6 +93,7 @@ func executeQuery(queryStr string, tree *sitter.Tree, lang *sitter.Language) []*
 	}
 	return results
 }
+*/
 
 func AllNodes(tree *sitter.Node) []*sitter.Node {
 	res := make([]*sitter.Node, 0)
@@ -135,24 +135,21 @@ func getAllStructures(tree *sitter.Tree, source []byte) []string {
 }
 
 func (config tsConfig) oneSource(sourceFile string, lang string) error {
-	println("running one source")
 	parser := sitter.NewParser()
 	parser.SetLanguage(tsLanguages[lang])
 
-	println("create parser")
 	sourceCode, err := os.ReadFile(sourceFile)
 	if err != nil {
 		return err
 	}
-	println("read file")
 	tree, err := parser.ParseCtx(context.Background(), nil, sourceCode)
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Printf("tree : %+v\n", tree)
+	//fmt.Printf("tree : %+v\n", tree)
 
 	actualImports := getAllImports(tree, sourceCode)
-	fmt.Printf("actualImports: %v\n", actualImports)
+	//fmt.Printf("actualImports: %v\n", actualImports)
 	actualStructures := getAllStructures(tree, sourceCode)
 
 	rules := config[lang]
@@ -210,7 +207,7 @@ func CheckSource(questionDir, submisionDir, lang string) error {
 		}
 	}
 
-	sources, err := util.AllLangSrcs(submisionDir, lang)
+	sources, err := util.FilterSrcsByLang(submisionDir, lang)
 	if err != nil {
 		return err
 	}
@@ -222,37 +219,4 @@ func CheckSource(questionDir, submisionDir, lang string) error {
 		}
 	}
 	return nil
-}
-
-func Query() {
-	parser := sitter.NewParser()
-	parser.SetLanguage(c.GetLanguage())
-	sourcePath := "./examples/sol-add-c/main.c"
-	sourceCode, err := os.ReadFile(sourcePath)
-	cobra.CheckErr(err)
-	tree, err := parser.ParseCtx(context.Background(), nil, sourceCode)
-	if err != nil {
-		panic(err.Error())
-	}
-	query, err := sitter.NewQuery([]byte("(array_declarator)"), c.GetLanguage())
-	if err != nil {
-		panic(err.Error())
-	}
-	qc := sitter.NewQueryCursor()
-	qc.Exec(query, tree.RootNode())
-
-	var funcs []*sitter.Node
-	for {
-		m, ok := qc.NextMatch()
-		if !ok {
-			break
-		}
-
-		for _, c := range m.Captures {
-			funcs = append(funcs, c.Node)
-			fmt.Println(c.Node)
-		}
-	}
-	_ = funcs
-	query.Close()
 }

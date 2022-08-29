@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/rsharifnasab/DJ/pkg/run"
+	"github.com/rsharifnasab/DJ/pkg/ts"
 	"github.com/rsharifnasab/DJ/pkg/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -193,6 +194,14 @@ func (submission *Submission) RunGroup(groupResult *TestGroupResult) {
 	submission.logger.LogTo(submission.currentGroup, "score", groupResult.String())
 }
 
+func (submission *Submission) checkSourceCodes() {
+	err := ts.CheckSource(submission.Question, submission.solution, submission.Language)
+	if err != nil {
+		cobra.CheckErr(fmt.Errorf("check source code failed beucase %v", err))
+	}
+
+}
+
 func (submission *Submission) RunSuite() *SubmissionResult {
 	submission.PrintInitialInfo()
 
@@ -200,6 +209,8 @@ func (submission *Submission) RunSuite() *SubmissionResult {
 	submission.checkReq()
 	submission.compile()
 	submission.backupCompiled()
+
+	submission.checkSourceCodes()
 
 	submission.Result = &SubmissionResult{
 		Submission:       submission,

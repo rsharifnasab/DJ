@@ -12,6 +12,6 @@ public class Main {
         sc.close();
         Socket s = new Socket();
         s.close();
-        new java.math.BigDecimal("1");
+        //new java.math.BigDecimal("1");
     }
 }
