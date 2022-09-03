@@ -197,6 +197,9 @@ func (config tsConfig) oneSource(sourceFile string, lang string) error {
 func CheckSource(questionDir, submisionDir, lang string) error {
 	conf, err := loadConfig(questionDir)
 	if err != nil {
+		if os.IsNotExist(err) { // no ts.yaml
+			return nil
+		}
 		panic(err)
 	}
 
