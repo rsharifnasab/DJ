@@ -7,7 +7,6 @@ DJ stands for Distributed Judge. A tool that many TAs wish they would have. This
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://choosealicense.com/licenses/mit/)
 ![Languages count](https://img.shields.io/github/languages/count/rsharifnasab/DJ?style=for-the-badge)
-![Lines count](https://img.shields.io/tokei/lines/github/rsharifnasab/DJ?style=for-the-badge)
 ![Commit Freq](https://img.shields.io/github/commit-activity/w/rsharifnasab/DJ?style=for-the-badge)
 
 ![CI status](https://github.com/rsharifnasab/DJ/actions/workflows/test.yml/badge.svg?)
