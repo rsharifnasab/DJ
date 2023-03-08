@@ -1,5 +1,7 @@
 # DJ
-DJ stands for Distributed Judge. A tool that many TAs wish they would have. This would provide more flexibility over normal judges such as [Quera](https://quera.ir)
+DJ stands for Distributed Judge. A tool that many TAs wish they could have. This would provide more flexibility over normal judges such as [Quera](https://quera.ir) which is used by many Iranian universities
+
+<!-- TODO: Add an example of a non-Persian judge -->
 
 
 
@@ -14,7 +16,7 @@ DJ stands for Distributed Judge. A tool that many TAs wish they would have. This
 ## Features
 
 - Judges student codes locally
-- The most flexible judge out there
+- Flexible 
 - Checks out source codes against illegal usage of language constructs.
 - Doesn't need a server
 
@@ -40,30 +42,32 @@ This is a demo which demonstrate how students can judge their codes locally.
 + For running tests you should have `python3` and `gcc` and `java` in your `PATH`
 
 
-### How to Instal
+### Installation
 
-Official way to use this repository is to clone the repository and run the "Distribute script"
+Official way to use this repository is to clone the repository and run the "Distribute script".
 
-You can also install the binary file like this (which is not recommended because it does not contain examples)
+However, you can also install with `go install` and providing a git repository:
 ```bash
-  go install "github.com/rsharifnasab/DJ@latest"
+$ go install "github.com/rsharifnasab/DJ@latest"
 ```
 
-And then use binary file like this:
+And after that, use the binary file:
   
 ```bash
-  DJ --help 
+$ DJ --help 
 ```
+
+But this method is not recommended as it won't have the examples contained.
     
 ## Distribute for students
 
-To Distribute the project run
+To distribute the project run
 
 ```bash
-  ./scripts/dsitribute.sh
+./scripts/distribute.sh
 ```
 
-Then the distribution zip would be in `./bin/` directory.
+Then the distribution ZIP would be in `./bin/`.
 
 
 ## Running Tests
@@ -71,7 +75,7 @@ Then the distribution zip would be in `./bin/` directory.
 To run tests, run the following command
 
 ```bash
-  go test ./... -cover  -count 1
+$ go test ./... -cover  -count 1
 ```
 
 
@@ -90,17 +94,12 @@ No you don't. The course TA should clone this repository and create questions an
 
 No you don't. The flexible part is not programmed in Go, but instead you need a bit of bash script knowledge to tune judges and develop creative questions.
 
-
-
-
 ## Used By
 
 This project is used by the following courses:
 
-- Shahid Beheshti university, Advanced programming (WIP at that time)
+- Shahid Beheshti university, Advanced programming (WIP at the time of writing this)
 - Sharif University, Compiler course for CE students
-
-
 
 ## Related
 
@@ -112,9 +111,9 @@ Here are some related projects
 ## Roadmap
 
 - Better Windows support
-- Provide learning resources for Bash script
+- Provide learning resources for Bash scripting
 - Better API for source code checks
-- Save student scores on a Block Chain
+- Save student scores on a BlockChain
 
 
 ## License
@@ -124,5 +123,4 @@ Here are some related projects
 
 ## Support
 
-For support, email rsharifnasab@gmail.com.
-
+For support, email rsharifnasab on gmail.com.
