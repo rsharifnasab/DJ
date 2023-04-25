@@ -40,7 +40,7 @@ This is a demo which demonstrate how students can judge their codes locally.
 + For running tests you should have `python3` and `gcc` and `java` in your `PATH`
 
 
-### How to Instal
+### How to Install
 
 Official way to use this repository is to clone the repository and run the "Distribute script"
 
