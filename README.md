@@ -27,11 +27,6 @@ DJ stands for Distributed Judge. A tool that many TAs wish they would have. This
  
 
 
-## Demo
-
-This is a demo which demonstrate how students can judge their codes locally.
-
-[![demo](https://asciinema.org/a/335480.svg)](https://asciinema.org/a/B7EEbzwsnDVGq7pFu012wm5UM?autoplay=1)
 ## Installation
 
 ### Prerequisites
