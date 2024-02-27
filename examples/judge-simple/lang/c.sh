@@ -13,5 +13,5 @@ elif [[ "$COMMAND" == "run" ]]; then
     actual_out="$3"
     ./out/a.out <"$inp_file" >"$actual_out"
 else
-    echo "error in java lang"
+    echo "error in c lang"
 fi
