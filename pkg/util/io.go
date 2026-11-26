@@ -78,8 +78,9 @@ func AutoCd(dir string) string {
 	} else if listDir, err := ListDir(dir); err != nil {
 		return dir
 	} else if len(listDir) == 1 {
-		if IsDirExists(listDir[0]) {
-			return AutoCd(dir + "/" + listDir[0])
+		child := filepath.Join(dir, listDir[0])
+		if info, err := os.Stat(child); err == nil && info.IsDir() {
+			return AutoCd(child)
 		}
 		return dir // handle single file upload
 	} else {

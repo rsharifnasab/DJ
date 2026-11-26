@@ -16,6 +16,20 @@ func ZipDir(filename string, dir string) error {
 	if err != nil {
 		return err
 	}
+
+	// resolve both paths against the current working directory up
+	// front: the chdir below would otherwise reinterpret relative
+	// paths (e.g. a relative result directory), so the zip landed
+	// in the wrong place or was never created at all
+	filename, err = filepath.Abs(filename)
+	if err != nil {
+		return err
+	}
+	dir, err = filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+
 	defer func(cwd string) {
 		err = os.Chdir(cwd)
 		if err != nil {
