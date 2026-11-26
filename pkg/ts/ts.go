@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/rsharifnasab/DJ/pkg/util"
 	sitter "github.com/smacker/go-tree-sitter"
@@ -24,6 +25,7 @@ import (
 	"github.com/smacker/go-tree-sitter/rust"
 	"github.com/smacker/go-tree-sitter/scala"
 	"github.com/smacker/go-tree-sitter/typescript/typescript"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
@@ -66,7 +68,9 @@ func loadConfig(questionDir string) (tsConfig, error) {
 		return nil, err
 	}
 
-	fmt.Printf("config : %+v\n", conf)
+	if viper.GetBool("debug") {
+		fmt.Printf("config : %+v\n", conf)
+	}
 	return conf, nil
 }
 
@@ -111,14 +115,12 @@ func getAllImports(tree *sitter.Tree, source []byte) []string {
 
 	allNodes := AllNodes(tree.RootNode())
 	for _, node := range allNodes {
-		fmt.Printf("%d : (type %v) %v\n\n", 0, node.Type(), node)
 		switch node.Type() {
 		case "preproc_include": // c, cpp
 			start := node.ChildByFieldName("path").StartByte()
 			end := node.ChildByFieldName("path").EndByte()
 			res = append(res, string(source[start+1:end-1]))
 		case "scoped_identifier", "scoped_type_identifier": // java
-			fmt.Println("import dcl")
 			start := node.StartByte()
 			end := node.EndByte()
 			res = append(res, string(source[start:end]))
@@ -132,6 +134,18 @@ func getAllImports(tree *sitter.Tree, source []byte) []string {
 func getAllStructures(tree *sitter.Tree, source []byte) []string {
 	res := make([]string, 0)
 	return res
+}
+
+// matchesImportRule reports whether actualImport is covered by a
+// rule entry. Entries match exactly, or as a package prefix: a rule
+// like java.util covers java.util.List and java.util.* as well.
+func matchesImportRule(actualImport string, rules []string) bool {
+	for _, rule := range rules {
+		if actualImport == rule || strings.HasPrefix(actualImport, rule+".") {
+			return true
+		}
+	}
+	return false
 }
 
 func (config tsConfig) oneSource(sourceFile string, lang string) error {
@@ -155,27 +169,18 @@ func (config tsConfig) oneSource(sourceFile string, lang string) error {
 	rules := config[lang]
 	whiteImports, prs := rules["import-white"]
 	if prs {
-	actual:
 		for _, actualImport := range actualImports {
-			// searching for actualImport in wImport
-			for _, wImport := range whiteImports {
-				if wImport == actualImport {
-					continue actual
-				}
+			if !matchesImportRule(actualImport, whiteImports) {
+				return fmt.Errorf("importing [%s] isn't allowed because it is not in the white list", actualImport)
 			}
-			return fmt.Errorf("importing [%s] isn't allowed because it is not in the white list", actualImport)
-
 		}
-
 	}
 
 	blackImports, prs := rules["import-black"]
 	if prs {
-		for _, bImport := range blackImports {
-			for _, actualImport := range actualImports {
-				if actualImport == bImport {
-					return fmt.Errorf("importing %s isn't allowed because it is in the black list", actualImport)
-				}
+		for _, actualImport := range actualImports {
+			if matchesImportRule(actualImport, blackImports) {
+				return fmt.Errorf("importing %s isn't allowed because it is in the black list", actualImport)
 			}
 		}
 	}
@@ -194,7 +199,7 @@ func (config tsConfig) oneSource(sourceFile string, lang string) error {
 	return nil
 }
 
-func CheckSource(questionDir, submisionDir, lang string) error {
+func CheckSource(questionDir, submissionDir, lang string) error {
 	conf, err := loadConfig(questionDir)
 	if err != nil {
 		if os.IsNotExist(err) { // no ts.yaml
@@ -204,17 +209,19 @@ func CheckSource(questionDir, submisionDir, lang string) error {
 	}
 
 	if lang == "" {
-		lang, err = util.AutoDetectLanguage(submisionDir)
+		lang, err = util.AutoDetectLanguage(submissionDir)
 		if err != nil {
 			return err
 		}
 	}
 
-	sources, err := util.FilterSrcsByLang(submisionDir, lang)
+	sources, err := util.FilterSrcsByLang(submissionDir, lang)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("sources : %v\n", sources)
+	if viper.GetBool("debug") {
+		fmt.Printf("sources : %v\n", sources)
+	}
 	for _, sourceFile := range sources {
 		err := conf.oneSource(sourceFile, lang)
 		if err != nil {
