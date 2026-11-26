@@ -3,6 +3,7 @@ package run
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/fs"
 	"os/exec"
 	"path/filepath"
@@ -81,6 +82,24 @@ func monitorMem(pid int, memLimit uint64, result chan uint64) {
 	}
 }
 
+// readAllLimited reads from r until EOF, storing at most len(buf) bytes.
+// It returns the number of bytes stored and whether the source produced
+// more data than the buffer could hold.
+func readAllLimited(r io.Reader, buf []byte) (int, bool, error) {
+	total := 0
+	for total < len(buf) {
+		n, err := r.Read(buf[total:])
+		total += n
+		if err != nil {
+			if err == io.EOF {
+				return total, false, nil
+			}
+			return total, false, err
+		}
+	}
+	return total, true, nil
+}
+
 // Run a command with given limits for outbut (bytes), memory limiy (bytes) and duration
 // duration is handling with golang's context so it's almost reliable
 // but output limit and memory limit are handmaiden cross platform solutions
@@ -145,21 +164,17 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	pid := execCmd.Process.Pid
 	go monitorMem(pid, memLimit, memUsageResult)
 
-	// fill stdout buffer
-	bytesRead, _ := stdoutPipe.Read(outBuf)
-	if bytesRead == outLimit+1 {
+	// read stdout until EOF (or until the limit is hit): a single Read
+	// may return a partial chunk, and closing the pipe early sends
+	// SIGPIPE to programs that keep writing their output
+	bytesRead, overLimit, err := readAllLimited(stdoutPipe, outBuf)
+	cobra.CheckErr(err)
+	if overLimit {
 		return "", "", ErrOutputLimit
 	}
 
-	err = stdoutPipe.Close()
-	cobra.CheckErr(err)
-
-	// fill stderr buffer
-	stderrN, _ := stderrPipe.Read(errBuf)
-	_ = stderrN
-
-	err = stderrPipe.Close()
-	cobra.CheckErr(err)
+	// stderr is best-effort: capture as much as the buffer allows
+	stderrN, _, _ := readAllLimited(stderrPipe, errBuf)
 
 	// finished flag become true
 	// and check for any error
@@ -168,7 +183,7 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	if ctx.Err() == context.DeadlineExceeded {
 		return "", "", ErrTimedOut
 	} else if ctx.Err() != nil {
-		panic(err)
+		panic(ctx.Err())
 	}
 
 	select {
