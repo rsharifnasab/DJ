@@ -55,7 +55,7 @@ And then use binary file like this:
 To Distribute the project run
 
 ```bash
-  ./scripts/dsitribute.sh
+  ./scripts/distribute.sh
 ```
 
 Then the distribution zip would be in `./bin/` directory.

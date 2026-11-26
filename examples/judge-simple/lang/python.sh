@@ -7,7 +7,7 @@ readonly COMMAND="$1"
 if [[ "$COMMAND" == "compile" ]]; then
     rm -rf out
     mkdir -p out
-    python -m compileall -q .
+    python3 -m compileall -q .
 elif [[ "$COMMAND" == "run" ]]; then
     inp_file="$2"
     actual_out="$3"

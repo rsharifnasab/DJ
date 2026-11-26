@@ -11,7 +11,7 @@ c:
 
 java:
   import-black:
-    # this may not wor
+    # this may not work
     - java.net.Socket
     # but this would work
     - java.math
