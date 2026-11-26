@@ -117,3 +117,15 @@ sleep 0.5
 	assert.NoError(t, err)
 	assert.EqualValues(t, "done\n", stdout)
 }
+
+// Fast-exiting commands used to make the memory monitor race with the
+// process exit: monitorMem called cobra.CheckErr on the NewProcess
+// error and terminated the whole program. Hammer Run with short-lived
+// commands to make sure the judge survives.
+func TestFastExitRace(t *testing.T) {
+	for i := 0; i < 200; i++ {
+		_, _, err := Run(`bash -c 'true'`,
+			1024, 512*1024*1024, 2*time.Second)
+		assert.ErrorIs(t, err, ErrNoOutput)
+	}
+}
