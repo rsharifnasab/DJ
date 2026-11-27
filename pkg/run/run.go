@@ -53,7 +53,12 @@ func monitorMem(pid int, memLimit uint64, result chan uint64) {
 	// (why windows still exists?)
 
 	process, err := process.NewProcess(int32(pid))
-	cobra.CheckErr(err)
+	if err != nil {
+		// The process already exited before monitoring started
+		// (e.g. fast-exiting commands). Monitoring is best-effort:
+		// never bring the whole judge down because of it.
+		return
+	}
 
 	for {
 		totalUsingMem, err := totalMemoryUsage(process)
@@ -65,13 +70,17 @@ func monitorMem(pid int, memLimit uint64, result chan uint64) {
 			// windows, systemcall error
 			return
 		default:
-			panic(err)
+			// /proc entries can vanish mid-scan when the process
+			// finishes; stop monitoring instead of crashing.
+			return
 		}
 
 		if totalUsingMem > memLimit {
 			err := process.Kill()
 			if err != nil {
-				panic(err)
+				// the process probably finished on its own in
+				// this exact moment; nothing left to enforce
+				return
 			}
 			result <- totalUsingMem
 			return
@@ -89,7 +98,9 @@ func Run(commandStr string, outLimit int, memLimit uint64, timeout time.Duration
 	// sharif-judge use this:
 	// https://github.com/mjnaderi/Sharif-Judge/blob/Version-1/tester/runcode.sh
 
-	memUsageResult := make(chan uint64)
+	// buffered so monitorMem never blocks sending a result
+	// that nobody reads anymore (e.g. after a timeout)
+	memUsageResult := make(chan uint64, 1)
 
 	if viper.GetBool("debug") {
 		fmt.Println("command: 	" + commandStr)
