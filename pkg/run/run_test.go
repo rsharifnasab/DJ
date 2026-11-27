@@ -2,6 +2,7 @@ package run
 
 import (
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -40,9 +41,7 @@ func TestMemoryLimit(t *testing.T) {
 
 func TestOutputLimit(t *testing.T) {
 	_, _, err := Run(`bash -c 'while true; do echo "text text text"; done'`, 100, 50*1024*1024, 5*time.Second)
-	assert.Error(t, err)
-	assert.Contains(t, []error{ErrOutputLimit, ErrNonZeroExit, ErrTimedOut}, err)
-	// why non-zero? wht time limit on windows?
+	assert.EqualValues(t, ErrOutputLimit, err)
 }
 
 func TestNoOutput(t *testing.T) {
@@ -94,6 +93,17 @@ echo "hello world"
 		5*1024, 50*1024*1024, 100*time.Millisecond)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "hello world\n", stdout)
+}
+
+// Streaming output arrives in several pipe chunks. A single Read
+// used to capture only the first chunk, and closing the pipe early
+// killed writers with SIGPIPE, truncating output and mislabeling
+// the test result.
+func TestStreamedOutput(t *testing.T) {
+	script := `bash -c 'for i in $(seq 1 40); do echo "chunk $i"; sleep 0.02; done'`
+	out, _, err := DefaultRun(script)
+	assert.NoError(t, err)
+	assert.Equal(t, 40, strings.Count(out, "chunk"))
 }
 
 func TestChild(t *testing.T) {
