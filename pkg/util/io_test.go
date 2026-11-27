@@ -2,11 +2,33 @@ package util
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
+
+// AutoCd must descend into the single child directory of dir even
+// when the current working directory contains nothing with the same
+// name; the child existence check used the wrong (cwd-relative) path.
+func TestAutoCdSingleChildDir(t *testing.T) {
+	root := t.TempDir()
+	inner := filepath.Join(root, "wrap")
+	assert.NoError(t, os.MkdirAll(filepath.Join(inner, "sol"), 0755))
+
+	got := AutoCd(inner)
+	assert.Equal(t, filepath.Join(inner, "sol"), got)
+}
+
+func TestAutoCdSingleFile(t *testing.T) {
+	root := t.TempDir()
+	inner := filepath.Join(root, "wrap")
+	assert.NoError(t, os.MkdirAll(inner, 0755))
+	assert.NoError(t, os.WriteFile(filepath.Join(inner, "main.c"), []byte("int main(){}"), 0644))
+
+	assert.Equal(t, inner, AutoCd(inner))
+}
 
 func TestDirEmpty(t *testing.T) {
 	tmp := MakeTempfolder()
